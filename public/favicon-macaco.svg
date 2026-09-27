@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f6c2d3" />
+      <stop offset="100%" stop-color="#d8658b" />
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="16" fill="url(#bg)" />
+
+  <!-- Orelhas -->
+  <circle cx="20" cy="24" r="8" fill="#7a4a2c" />
+  <circle cx="44" cy="24" r="8" fill="#7a4a2c" />
+  <circle cx="20" cy="24" r="4" fill="#f3d3b3" />
+  <circle cx="44" cy="24" r="4" fill="#f3d3b3" />
+
+  <!-- Cabeça -->
+  <circle cx="32" cy="30" r="16" fill="#7a4a2c" />
+
+  <!-- Rosto -->
+  <ellipse cx="32" cy="36" rx="12" ry="9" fill="#f3d3b3" />
+
+  <!-- Olhos -->
+  <circle cx="27" cy="28" r="2" fill="#2d1b12" />
+  <circle cx="37" cy="28" r="2" fill="#2d1b12" />
+
+  <!-- Nariz -->
+  <ellipse cx="32" cy="34" rx="2.2" ry="1.6" fill="#5c3822" />
+
+  <!-- Boca -->
+  <path
+    d="M28 39 Q32 42 36 39"
+    fill="none"
+    stroke="#5c3822"
+    stroke-width="2"
+    stroke-linecap="round"
+  />
+</svg>
