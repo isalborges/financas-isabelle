@@ -432,8 +432,27 @@ function Auth({
     if (
       error
     ) {
+      const mensagemErro =
+        error.message
+          .toLowerCase();
+
+      const senhaIgual =
+        mensagemErro.includes(
+          'same password'
+        )
+        ||
+        mensagemErro.includes(
+          'different from the old password'
+        )
+        ||
+        mensagemErro.includes(
+          'new password should be different'
+        );
+
       setErro(
-        'Não foi possível atualizar a senha. Peça um novo link de recuperação e tente novamente.'
+        senhaIgual
+          ? 'A nova senha precisa ser diferente da senha atual.'
+          : 'Não foi possível atualizar a senha. Peça um novo link de recuperação e tente novamente.'
       );
 
       return;
