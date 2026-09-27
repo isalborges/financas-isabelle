@@ -10,7 +10,8 @@ import './Auth.css';
 
 type ModoAuth =
   | 'entrar'
-  | 'cadastrar';
+  | 'cadastrar'
+  | 'recuperar';
 
 type AvatarTipo =
   | 'tubarao'
@@ -54,7 +55,15 @@ const AVATARES: {
 const CHAVE_EMAIL =
   'financas-isabelle-email-lembrado';
 
-function Auth() {
+type AuthProps = {
+  recuperandoSenha?: boolean;
+  onSenhaAtualizada?: () => void;
+};
+
+function Auth({
+  recuperandoSenha = false,
+  onSenhaAtualizada
+}: AuthProps) {
   const emailSalvo =
     localStorage.getItem(
       CHAVE_EMAIL
@@ -99,6 +108,18 @@ function Auth() {
   const [
     confirmarSenha,
     setConfirmarSenha
+  ] =
+    useState('');
+
+  const [
+    novaSenha,
+    setNovaSenha
+  ] =
+    useState('');
+
+  const [
+    confirmarNovaSenha,
+    setConfirmarNovaSenha
   ] =
     useState('');
 
@@ -317,6 +338,214 @@ function Auth() {
     setConfirmarSenha('');
   }
 
+  async function enviarRecuperacao(
+    evento:
+      React.FormEvent<HTMLFormElement>
+  ) {
+    evento.preventDefault();
+
+    limparAvisos();
+
+    if (
+      !email.trim()
+    ) {
+      setErro(
+        'Digite seu e-mail.'
+      );
+
+      return;
+    }
+
+    setCarregando(true);
+
+    const {
+      error
+    } =
+      await supabase.auth
+        .resetPasswordForEmail(
+          email.trim(),
+          {
+            redirectTo:
+              `${window.location.origin}/`
+          }
+        );
+
+    setCarregando(false);
+
+    if (
+      error
+    ) {
+      setErro(
+        'Não foi possível enviar o e-mail de recuperação. Confira o endereço e tente novamente.'
+      );
+
+      return;
+    }
+
+    setMensagem(
+      'Pronto! Enviamos um link para redefinir sua senha. Confira também a caixa de spam.'
+    );
+  }
+
+  async function atualizarSenha(
+    evento:
+      React.FormEvent<HTMLFormElement>
+  ) {
+    evento.preventDefault();
+
+    limparAvisos();
+
+    if (
+      novaSenha.length < 6
+    ) {
+      setErro(
+        'A nova senha precisa ter pelo menos 6 caracteres.'
+      );
+
+      return;
+    }
+
+    if (
+      novaSenha !==
+      confirmarNovaSenha
+    ) {
+      setErro(
+        'As novas senhas não são iguais.'
+      );
+
+      return;
+    }
+
+    setCarregando(true);
+
+    const {
+      error
+    } =
+      await supabase.auth
+        .updateUser({
+          password:
+            novaSenha
+        });
+
+    setCarregando(false);
+
+    if (
+      error
+    ) {
+      setErro(
+        'Não foi possível atualizar a senha. Peça um novo link de recuperação e tente novamente.'
+      );
+
+      return;
+    }
+
+    window.alert(
+      'Senha atualizada com sucesso!'
+    );
+
+    onSenhaAtualizada?.();
+  }
+
+  if (
+    recuperandoSenha
+  ) {
+    return (
+      <div className="auth-page">
+        <section className="auth-card">
+          <div className="auth-marca">
+            <div className="auth-avatar">
+              🔑
+            </div>
+
+            <div>
+              <h1>
+                Nova senha
+              </h1>
+
+              <p>
+                Escolha uma nova senha para sua conta.
+              </p>
+            </div>
+          </div>
+
+          <form
+            className="auth-form"
+            onSubmit={
+              atualizarSenha
+            }
+          >
+            <div className="campo">
+              <label>
+                Nova senha
+              </label>
+
+              <input
+                type="password"
+                placeholder="••••••••"
+                autoComplete="new-password"
+                value={
+                  novaSenha
+                }
+                onChange={(
+                  evento
+                ) =>
+                  setNovaSenha(
+                    evento.target.value
+                  )
+                }
+              />
+            </div>
+
+            <div className="campo">
+              <label>
+                Confirmar nova senha
+              </label>
+
+              <input
+                type="password"
+                placeholder="••••••••"
+                autoComplete="new-password"
+                value={
+                  confirmarNovaSenha
+                }
+                onChange={(
+                  evento
+                ) =>
+                  setConfirmarNovaSenha(
+                    evento.target.value
+                  )
+                }
+              />
+            </div>
+
+            {erro && (
+              <div className="auth-alerta erro">
+                {erro}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="btn-primary auth-submit"
+              disabled={
+                carregando
+              }
+            >
+              {carregando
+                ? 'Salvando...'
+                : 'Salvar nova senha'
+              }
+            </button>
+          </form>
+
+          <p className="auth-seguranca">
+            🔒 Sua nova senha será protegida pelo Supabase.
+          </p>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="auth-page">
       <section className="auth-card">
@@ -343,6 +572,7 @@ function Auth() {
           </div>
         </div>
 
+        {modo !== 'recuperar' && (
         <div className="auth-abas">
           <button
             type="button"
@@ -376,13 +606,40 @@ function Auth() {
             Criar conta
           </button>
         </div>
+        )}
+
+        {modo === 'recuperar' && (
+          <div className="auth-recuperar-topo">
+            <button
+              type="button"
+              className="auth-voltar"
+              onClick={() =>
+                trocarModo(
+                  'entrar'
+                )
+              }
+            >
+              ← Voltar para entrar
+            </button>
+
+            <h2>
+              Esqueci minha senha
+            </h2>
+
+            <p>
+              Digite seu e-mail e enviaremos um link para criar uma nova senha.
+            </p>
+          </div>
+        )}
 
         <form
           className="auth-form"
           onSubmit={
             modo === 'entrar'
               ? entrar
-              : cadastrar
+              : modo === 'cadastrar'
+                ? cadastrar
+                : enviarRecuperacao
           }
         >
           {modo ===
@@ -467,29 +724,31 @@ function Auth() {
             />
           </div>
 
-          <div className="campo">
-            <label>
-              Senha
-            </label>
+          {modo !== 'recuperar' && (
+            <div className="campo">
+              <label>
+                Senha
+              </label>
 
-            <input
-              type="password"
-              placeholder="••••••••"
-              autoComplete={
-                modo === 'entrar'
-                  ? 'current-password'
-                  : 'new-password'
-              }
-              value={senha}
-              onChange={(
-                evento
-              ) =>
-                setSenha(
-                  evento.target.value
-                )
-              }
-            />
-          </div>
+              <input
+                type="password"
+                placeholder="••••••••"
+                autoComplete={
+                  modo === 'entrar'
+                    ? 'current-password'
+                    : 'new-password'
+                }
+                value={senha}
+                onChange={(
+                  evento
+                ) =>
+                  setSenha(
+                    evento.target.value
+                  )
+                }
+              />
+            </div>
+          )}
 
           {modo ===
             'cadastrar' && (
@@ -516,25 +775,41 @@ function Auth() {
             </div>
           )}
 
-          <label className="auth-lembrar">
-            <input
-              type="checkbox"
-              checked={
-                lembrarEmail
-              }
-              onChange={(
-                evento
-              ) =>
-                setLembrarEmail(
-                  evento.target.checked
-                )
-              }
-            />
+          {modo === 'entrar' && (
+            <div className="auth-login-opcoes">
+              <label className="auth-lembrar">
+                <input
+                  type="checkbox"
+                  checked={
+                    lembrarEmail
+                  }
+                  onChange={(
+                    evento
+                  ) =>
+                    setLembrarEmail(
+                      evento.target.checked
+                    )
+                  }
+                />
 
-            <span>
-              Lembrar meu e-mail
-            </span>
-          </label>
+                <span>
+                  Lembrar meu e-mail
+                </span>
+              </label>
+
+              <button
+                type="button"
+                className="auth-esqueceu"
+                onClick={() =>
+                  trocarModo(
+                    'recuperar'
+                  )
+                }
+              >
+                Esqueci minha senha
+              </button>
+            </div>
+          )}
 
           {erro && (
             <div className="auth-alerta erro">
@@ -559,7 +834,9 @@ function Auth() {
               ? 'Aguarde...'
               : modo === 'entrar'
                 ? 'Entrar'
-                : 'Criar minha conta'
+                : modo === 'cadastrar'
+                  ? 'Criar minha conta'
+                  : 'Enviar link de recuperação'
             }
           </button>
         </form>

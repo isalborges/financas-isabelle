@@ -213,3 +213,54 @@
     display: none;
   }
 }
+
+
+/* RECUPERAÃ‡ÃƒO DE SENHA */
+
+.auth-login-opcoes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.auth-esqueceu,
+.auth-voltar {
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: #c96588;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-esqueceu:hover,
+.auth-voltar:hover {
+  text-decoration: underline;
+}
+
+.auth-recuperar-topo {
+  margin-bottom: 22px;
+}
+
+.auth-recuperar-topo h2 {
+  margin: 18px 0 6px;
+  font-size: 22px;
+}
+
+.auth-recuperar-topo p {
+  margin: 0;
+  color: #888;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 520px) {
+  .auth-login-opcoes {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}

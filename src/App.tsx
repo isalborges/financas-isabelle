@@ -674,6 +674,12 @@ function App() {
 
     useState(true);
 
+  const [
+    recuperandoSenha,
+    setRecuperandoSenha
+  ] =
+    useState(false);
+
 
 
   const [
@@ -920,11 +926,20 @@ function App() {
 
             (
 
-              _evento,
+              evento,
 
               novaSession
 
             ) => {
+
+              if (
+                evento ===
+                'PASSWORD_RECOVERY'
+              ) {
+                setRecuperandoSenha(
+                  true
+                );
+              }
 
               setSession(
 
@@ -3714,6 +3729,22 @@ function App() {
     );
 
   }
+  if (
+    recuperandoSenha
+  ) {
+    return (
+      <Auth
+        recuperandoSenha
+        onSenhaAtualizada={() => {
+          setRecuperandoSenha(
+            false
+          );
+        }}
+      />
+    );
+  }
+
+
 
 
 
