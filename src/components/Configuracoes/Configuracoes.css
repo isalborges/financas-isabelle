@@ -1,0 +1,283 @@
+/* CONFIGURAÇÕES */
+
+.config-secao {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 25px;
+}
+
+
+.config-titulo h2 {
+  margin:
+    0 0 6px;
+
+  font-size: 26px;
+}
+
+
+.config-titulo p {
+  margin: 0;
+
+  color: #888;
+
+  font-size: 14px;
+}
+
+
+/* SUCESSO */
+
+.config-sucesso {
+  padding:
+    14px 18px;
+
+  border-radius: 12px;
+
+  background: #edf8f1;
+
+  color: #387852;
+
+  font-size: 14px;
+
+  font-weight: 600;
+}
+
+
+/* CAIXINHAS */
+
+.config-caixinhas {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+
+.config-caixinha {
+  padding: 18px;
+
+  border:
+    1px solid #eee8eb;
+
+  border-radius: 16px;
+
+  background: #fff;
+}
+
+
+.config-caixinha-campos {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 20px;
+}
+
+
+.config-caixinha-rodape {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-top: 14px;
+}
+
+
+.config-caixinha-rodape > span {
+  color: #999;
+
+  font-size: 12px;
+}
+
+
+.config-percentual {
+  position: relative;
+}
+
+
+.config-percentual input {
+  padding-right: 42px;
+}
+
+
+.config-percentual > span {
+  position: absolute;
+
+  top: 50%;
+
+  right: 15px;
+
+  transform:
+    translateY(-50%);
+
+  color: #999;
+
+  font-weight: 600;
+}
+
+
+/* EXCLUIR */
+
+.config-excluir {
+  border: none;
+
+  background: transparent;
+
+  color: #c15372;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+
+.config-excluir:hover {
+  text-decoration: underline;
+}
+
+
+/* ADICIONAR */
+
+.config-adicionar {
+  display: grid;
+
+  grid-template-columns:
+    1fr auto;
+
+  align-items: end;
+
+  gap: 12px;
+}
+
+
+/* CATEGORIAS */
+
+.config-categorias {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 10px;
+}
+
+
+.config-categoria {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding:
+    9px 12px;
+
+  border-radius: 999px;
+
+  background: #faf4f6;
+
+  color: #6e5b62;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+
+.config-categoria button {
+  width: 20px;
+
+  height: 20px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: transparent;
+
+  color: #b88093;
+
+  font-size: 17px;
+
+  cursor: pointer;
+}
+
+
+.config-categoria button:hover {
+  background: #fde7ef;
+
+  color: #c15372;
+}
+
+
+/* AVISO */
+
+.config-aviso {
+  padding: 18px;
+
+  border-radius: 14px;
+
+  background: #fff8fa;
+
+  color: #765661;
+}
+
+
+.config-aviso strong {
+  display: block;
+
+  margin-bottom: 5px;
+}
+
+
+.config-aviso p {
+  margin: 0;
+
+  color: #967984;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+}
+
+
+/* MOBILE */
+
+@media (
+  max-width: 760px
+) {
+
+  .config-caixinha-campos {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .config-adicionar {
+    grid-template-columns:
+      1fr;
+  }
+
+}
+
+.config-salvar-final {
+  display: flex;
+
+  justify-content: flex-end;
+
+  padding-bottom: 10px;
+}
