@@ -32,6 +32,9 @@ type ConfiguracoesProps = {
         ConfiguracoesFinanceiras
     ) => Promise<boolean>;
   userId: string;
+  emailUsuario: string;
+  provedoresLogin: string[];
+  contaCriadaEm: string;
   nomeUsuario: string;
   avatarTipo: string;
   avatarUrl: string | null;
@@ -111,11 +114,20 @@ const MODOS_TEMA = [
   }
 ];
 
+const FORMAS_PAGAMENTO_OBRIGATORIAS = [
+  'PIX',
+  'Crédito',
+  'Débito'
+];
+
 function Configuracoes({
   onAlteracoesPendentes,
   configuracoesSalvas,
   onSalvarConfiguracoes,
   userId,
+  emailUsuario,
+  provedoresLogin,
+  contaCriadaEm,
   nomeUsuario,
   avatarTipo,
   avatarUrl,
@@ -211,6 +223,61 @@ function Configuracoes({
   ] =
     useState(false);
 
+  const [
+    novaSenha,
+    setNovaSenha
+  ] =
+    useState('');
+
+  const [
+    confirmarNovaSenha,
+    setConfirmarNovaSenha
+  ] =
+    useState('');
+
+  const [
+    salvandoSenha,
+    setSalvandoSenha
+  ] =
+    useState(false);
+
+  const [
+    mensagemSeguranca,
+    setMensagemSeguranca
+  ] =
+    useState('');
+
+  const [
+    erroSeguranca,
+    setErroSeguranca
+  ] =
+    useState('');
+
+  const usaGoogle =
+    provedoresLogin.includes(
+      'google'
+    );
+
+  const usaEmailSenha =
+    provedoresLogin.includes(
+      'email'
+    );
+
+  const dataCriacaoFormatada =
+    contaCriadaEm
+      ? new Intl.DateTimeFormat(
+          'pt-BR',
+          {
+            dateStyle:
+              'medium'
+          }
+        ).format(
+          new Date(
+            contaCriadaEm
+          )
+        )
+      : 'Não disponível';
+
   const perfilSalvo = {
     nome:
       nomeUsuario,
@@ -227,6 +294,11 @@ function Configuracoes({
   const [
     novaCategoria,
     setNovaCategoria
+  ] = useState('');
+
+  const [
+    novaFormaPagamento,
+    setNovaFormaPagamento
   ] = useState('');
 
   const [
@@ -353,6 +425,86 @@ function Configuracoes({
   }, [
     onAlteracoesPendentes
   ]);
+
+  async function alterarSenha() {
+    setMensagemSeguranca('');
+    setErroSeguranca('');
+
+    if (
+      novaSenha.length <
+      6
+    ) {
+      setErroSeguranca(
+        'A nova senha precisa ter pelo menos 6 caracteres.'
+      );
+
+      return;
+    }
+
+    if (
+      novaSenha !==
+      confirmarNovaSenha
+    ) {
+      setErroSeguranca(
+        'As senhas não são iguais.'
+      );
+
+      return;
+    }
+
+    setSalvandoSenha(
+      true
+    );
+
+    const {
+      error
+    } =
+      await supabase.auth
+        .updateUser({
+          password:
+            novaSenha
+        });
+
+    setSalvandoSenha(
+      false
+    );
+
+    if (
+      error
+    ) {
+      const mensagemErro =
+        error.message
+          .toLowerCase();
+
+      const senhaIgual =
+        mensagemErro.includes(
+          'same password'
+        )
+        ||
+        mensagemErro.includes(
+          'different from the old password'
+        )
+        ||
+        mensagemErro.includes(
+          'new password should be different'
+        );
+
+      setErroSeguranca(
+        senhaIgual
+          ? 'A nova senha precisa ser diferente da senha atual.'
+          : 'Não foi possível alterar sua senha. Tente novamente.'
+      );
+
+      return;
+    }
+
+    setNovaSenha('');
+    setConfirmarNovaSenha('');
+
+    setMensagemSeguranca(
+      'Senha alterada com sucesso.'
+    );
+  }
 
   async function salvar() {
     setSalvando(true);
@@ -572,6 +724,69 @@ function Configuracoes({
           (categoria) =>
             categoria !==
             categoriaExcluir
+        )
+    });
+  }
+
+  function adicionarFormaPagamento() {
+    const nome =
+      novaFormaPagamento.trim();
+
+    if (!nome) {
+      return;
+    }
+
+    const jaExiste =
+      configuracoes.formasPagamento.some(
+        (forma) =>
+          forma.toLowerCase() ===
+          nome.toLowerCase()
+      );
+
+    if (jaExiste) {
+      return;
+    }
+
+    setConfiguracoes({
+      ...configuracoes,
+      formasPagamento: [
+        ...configuracoes.formasPagamento,
+        nome
+      ].sort(
+        (formaA, formaB) =>
+          formaA.localeCompare(
+            formaB,
+            'pt-BR',
+            {
+              sensitivity: 'base'
+            }
+          )
+      )
+    });
+
+    setNovaFormaPagamento('');
+  }
+
+  function excluirFormaPagamento(
+    formaExcluir: string
+  ) {
+    if (
+      FORMAS_PAGAMENTO_OBRIGATORIAS
+        .includes(formaExcluir)
+    ) {
+      window.alert(
+        'PIX, Crédito e Débito são formas de pagamento obrigatórias e não podem ser excluídas.'
+      );
+
+      return;
+    }
+
+    setConfiguracoes({
+      ...configuracoes,
+      formasPagamento:
+        configuracoes.formasPagamento.filter(
+          (forma) =>
+            forma !== formaExcluir
         )
     });
   }
@@ -875,6 +1090,190 @@ function Configuracoes({
 
       <section
         className="card config-secao"
+        id="config-conta"
+      >
+        <div className="config-titulo">
+          <div>
+            <h2>
+              Conta
+            </h2>
+
+            <p>
+              Veja seus dados de acesso e
+              gerencie a segurança da conta.
+            </p>
+          </div>
+        </div>
+
+        <div className="conta-resumo-grid">
+          <div className="conta-info-card">
+            <span className="conta-info-rotulo">
+              E-mail
+            </span>
+
+            <strong className="conta-info-valor">
+              {emailUsuario}
+            </strong>
+
+            <small>
+              Este é o e-mail usado para acessar sua conta.
+            </small>
+          </div>
+
+          <div className="conta-info-card">
+            <span className="conta-info-rotulo">
+              Forma de acesso
+            </span>
+
+            <div className="conta-provedores">
+              {usaGoogle && (
+                <span className="conta-provedor google">
+                  G Google
+                </span>
+              )}
+
+              {usaEmailSenha && (
+                <span className="conta-provedor email">
+                  ✉ E-mail e senha
+                </span>
+              )}
+
+              {!usaGoogle &&
+                !usaEmailSenha && (
+                  <span className="conta-provedor">
+                    Conta autenticada
+                  </span>
+                )}
+            </div>
+
+            <small>
+              Você pode continuar usando os métodos vinculados à sua conta.
+            </small>
+          </div>
+
+          <div className="conta-info-card">
+            <span className="conta-info-rotulo">
+              Conta criada em
+            </span>
+
+            <strong className="conta-info-valor">
+              {dataCriacaoFormatada}
+            </strong>
+
+            <small>
+              Data de criação da sua conta no Controle Financeiro.
+            </small>
+          </div>
+        </div>
+
+        <div className="conta-seguranca">
+          <div className="conta-seguranca-titulo">
+            <div>
+              <h3>
+                Senha
+              </h3>
+
+              <p>
+                {usaEmailSenha
+                  ? 'Altere a senha usada para entrar com e-mail.'
+                  : 'Sua conta está conectada pelo Google.'
+                }
+              </p>
+            </div>
+          </div>
+
+          {usaEmailSenha ? (
+            <div className="conta-senha-form">
+              <div className="campo">
+                <label>
+                  Nova senha
+                </label>
+
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="Mínimo de 6 caracteres"
+                  value={
+                    novaSenha
+                  }
+                  onChange={(evento) =>
+                    setNovaSenha(
+                      evento.target.value
+                    )
+                  }
+                />
+              </div>
+
+              <div className="campo">
+                <label>
+                  Confirmar nova senha
+                </label>
+
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="Digite novamente"
+                  value={
+                    confirmarNovaSenha
+                  }
+                  onChange={(evento) =>
+                    setConfirmarNovaSenha(
+                      evento.target.value
+                    )
+                  }
+                />
+              </div>
+
+              <button
+                type="button"
+                className="btn-secondary conta-alterar-senha"
+                onClick={
+                  alterarSenha
+                }
+                disabled={
+                  salvandoSenha
+                }
+              >
+                {salvandoSenha
+                  ? 'Alterando...'
+                  : 'Alterar senha'
+                }
+              </button>
+            </div>
+          ) : (
+            <div className="conta-google-aviso">
+              <span>
+                G
+              </span>
+
+              <div>
+                <strong>
+                  Senha gerenciada pelo Google
+                </strong>
+
+                <p>
+                  Para alterar sua senha, use as configurações da sua Conta Google.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {mensagemSeguranca && (
+            <div className="conta-mensagem sucesso">
+              ✓ {mensagemSeguranca}
+            </div>
+          )}
+
+          {erroSeguranca && (
+            <div className="conta-mensagem erro">
+              {erroSeguranca}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section
+        className="card config-secao"
         id="config-aparencia"
       >
         <div className="config-titulo">
@@ -1120,6 +1519,98 @@ function Configuracoes({
             }
           >
             + Adicionar caixinha
+          </button>
+        </div>
+      </section>
+
+      <section
+        className="card config-secao"
+        id="config-formas-pagamento"
+      >
+        <div className="config-titulo">
+          <div>
+            <h2>
+              Formas de pagamento
+            </h2>
+
+            <p>
+              Personalize as opções disponíveis nos lançamentos.
+              PIX, Crédito e Débito são obrigatórios.
+            </p>
+          </div>
+        </div>
+
+        <div className="config-categorias">
+          {configuracoes.formasPagamento.map(
+            (forma) => {
+              const obrigatoria =
+                FORMAS_PAGAMENTO_OBRIGATORIAS
+                  .includes(forma);
+
+              return (
+                <div
+                  className="config-categoria"
+                  key={forma}
+                >
+                  <span>
+                    {forma}
+                    {obrigatoria && (
+                      <small className="config-obrigatoria">
+                        Obrigatório
+                      </small>
+                    )}
+                  </span>
+
+                  {!obrigatoria && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        excluirFormaPagamento(forma)
+                      }
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              );
+            }
+          )}
+        </div>
+
+        <div className="config-adicionar">
+          <div className="campo">
+            <label>
+              Nova forma de pagamento
+            </label>
+
+            <input
+              type="text"
+              placeholder="Ex: Dinheiro, Boleto, Vale-refeição"
+              value={novaFormaPagamento}
+              onChange={(evento) =>
+                setNovaFormaPagamento(
+                  evento.target.value
+                )
+              }
+              onKeyDown={(evento) => {
+                if (
+                  evento.key ===
+                  'Enter'
+                ) {
+                  adicionarFormaPagamento();
+                }
+              }}
+            />
+          </div>
+
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={
+              adicionarFormaPagamento
+            }
+          >
+            + Adicionar forma
           </button>
         </div>
       </section>

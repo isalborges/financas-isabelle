@@ -86,19 +86,7 @@ import type {
 
 
 
-export type FormaPagamento =
-
-  | 'PIX'
-
-  | 'Cartão'
-
-  | 'Débito'
-
-  | 'Dinheiro'
-
-  | 'Boleto'
-
-  | 'Outro';
+export type FormaPagamento = string;
 
 
 
@@ -2474,7 +2462,7 @@ function App() {
 
             .select(
 
-              'categorias, caixinhas'
+              'categorias, caixinhas, formas_pagamento'
 
             )
 
@@ -2560,7 +2548,27 @@ function App() {
 
                 ? data.caixinhas
 
-                : []
+                : [],
+
+            formasPagamento:
+
+              Array.isArray(
+
+                data.formas_pagamento
+
+              ) && data.formas_pagamento.length > 0
+
+                ? data.formas_pagamento
+
+                : [
+
+                    'PIX',
+
+                    'Crédito',
+
+                    'Débito'
+
+                  ]
 
           });
 
@@ -2664,7 +2672,27 @@ function App() {
 
                   caixinhas:
 
-                    dadosConvertidos.caixinhas
+                    dadosConvertidos.caixinhas,
+
+                  formasPagamento:
+
+                    Array.isArray(
+
+                      dadosConvertidos.formasPagamento
+
+                    )
+
+                      ? dadosConvertidos.formasPagamento
+
+                      : [
+
+                          'PIX',
+
+                          'Crédito',
+
+                          'Débito'
+
+                        ]
 
                 };
 
@@ -2715,6 +2743,10 @@ function App() {
               caixinhas:
 
                 configuracoesIniciais.caixinhas,
+
+              formas_pagamento:
+
+                configuracoesIniciais.formasPagamento,
 
               updated_at:
 
@@ -2877,6 +2909,10 @@ function App() {
           caixinhas:
 
             novasConfiguracoes.caixinhas,
+
+          formas_pagamento:
+
+            novasConfiguracoes.formasPagamento,
 
           updated_at:
 
@@ -3502,6 +3538,8 @@ function App() {
 
       | 'categorias'
 
+      | 'formas-pagamento'
+
   ) {
 
     if (
@@ -3612,6 +3650,22 @@ function App() {
 
     ||
 
+    session?.user
+
+      .user_metadata
+
+      ?.full_name
+
+    ||
+
+    session?.user
+
+      .user_metadata
+
+      ?.name
+
+    ||
+
     session?.user.email
 
       ?.split('@')[0]
@@ -3619,6 +3673,62 @@ function App() {
     ||
 
     'Usuário';
+
+
+
+  const emailUsuario =
+
+    session?.user.email
+
+    ??
+
+    '';
+
+
+
+  const provedoresLogin =
+
+    Array.isArray(
+
+      session?.user
+
+        .app_metadata
+
+        ?.providers
+
+    )
+
+      ? session.user
+          .app_metadata
+          .providers
+          .filter(
+            (
+              provedor
+            ): provedor is string =>
+              typeof provedor ===
+              'string'
+          )
+      : session?.user
+          .app_metadata
+          ?.provider
+        ? [
+            String(
+              session.user
+                .app_metadata
+                .provider
+            )
+          ]
+        : [];
+
+
+
+  const contaCriadaEm =
+
+    session?.user.created_at
+
+    ??
+
+    '';
 
 
 
@@ -3701,17 +3811,6 @@ function App() {
     modoTema
 
   ]);
-
-
-
-  const emailUsuario =
-
-    session?.user.email ??
-
-    '';
-
-
-
   if (
 
     carregandoSessao
@@ -4295,6 +4394,30 @@ function App() {
               userId={
 
                 session.user.id
+
+              }
+
+
+
+              emailUsuario={
+
+                emailUsuario
+
+              }
+
+
+
+              provedoresLogin={
+
+                provedoresLogin
+
+              }
+
+
+
+              contaCriadaEm={
+
+                contaCriadaEm
 
               }
 
