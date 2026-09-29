@@ -10,6 +10,7 @@ export type ConfiguracoesFinanceiras = {
   categorias: string[];
   caixinhas:
     CaixinhaConfiguracao[];
+  formasPagamento: string[];
 };
 
 export const CONFIGURACOES_PADRAO:
@@ -23,6 +24,12 @@ export const CONFIGURACOES_PADRAO:
     'Educação',
     'Salário',
     'Outros'
+  ],
+
+  formasPagamento: [
+    'PIX',
+    'Crédito',
+    'Débito'
   ],
 
   caixinhas: [
@@ -55,7 +62,11 @@ export function copiarConfiguracoesPadrao():
           (caixinha) => ({
             ...caixinha
           })
-        )
+        ),
+    formasPagamento: [
+      ...CONFIGURACOES_PADRAO
+        .formasPagamento
+    ]
   };
 }
 

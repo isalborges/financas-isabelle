@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import type {
   ConfiguracoesFinanceiras
 } from '../../configuracoesFinanceiras';
@@ -12,6 +14,7 @@ type SidebarProps = {
       | 'aparencia'
       | 'caixinhas'
       | 'categorias'
+      | 'formas-pagamento'
   ) => void;
 
   abrirSecaoLancamentos: (
@@ -48,6 +51,38 @@ function Sidebar({
   configuracoes,
   onSair
 }: SidebarProps) {
+  const [
+    menuMobileAberto,
+    setMenuMobileAberto
+  ] = useState(false);
+
+  const [
+    grupoAberto,
+    setGrupoAberto
+  ] = useState<
+    | 'lancamentos'
+    | 'investimentos'
+    | 'configuracoes'
+    | null
+  >(null);
+
+  function alternarGrupo(
+    grupo:
+      | 'lancamentos'
+      | 'investimentos'
+      | 'configuracoes'
+  ) {
+    setGrupoAberto(
+      (grupoAtual) =>
+        grupoAtual === grupo
+          ? null
+          : grupo
+    );
+  }
+
+  function fecharMenuMobile() {
+    setMenuMobileAberto(false);
+  }
 
   const emojis: Record<
     string,
@@ -66,7 +101,33 @@ function Sidebar({
     ] ?? '🦈';
 
   return (
-    <aside className="sidebar">
+    <aside
+      className={`sidebar ${
+        menuMobileAberto
+          ? 'sidebar-mobile-aberta'
+          : ''
+      }`}
+    >
+      <button
+        type="button"
+        className="sidebar-mobile-toggle"
+        aria-label={
+          menuMobileAberto
+            ? 'Fechar menu'
+            : 'Abrir menu'
+        }
+        onClick={() =>
+          setMenuMobileAberto(
+            (aberto) => !aberto
+          )
+        }
+      >
+        {menuMobileAberto
+          ? '×'
+          : '☰'
+        }
+      </button>
+
       <div className="logo">
         <div className="avatar">
           {avatarUrl ? (
@@ -100,9 +161,10 @@ function Sidebar({
               ? 'active'
               : ''
           }
-          onClick={() =>
-            mudarPagina('dashboard')
-          }
+          onClick={() => {
+            mudarPagina('dashboard');
+            fecharMenuMobile();
+          }}
         >
           Menu Principal
         </a>
@@ -115,46 +177,62 @@ function Sidebar({
                 : ''
             }
             onClick={() =>
-              mudarPagina('lancamentos')
+              alternarGrupo(
+                'lancamentos'
+              )
             }
           >
-            Lançamentos
+            <span>
+              Lançamentos
+            </span>
+
+            <span className="sidebar-chevron">
+              {grupoAberto ===
+                'lancamentos'
+                ? '⌃'
+                : '⌄'
+              }
+            </span>
           </a>
 
-          {paginaAtual === 'lancamentos' && (
+          {grupoAberto === 'lancamentos' && (
             <div className="sidebar-submenu">
               <button
                 type="button"
-                onClick={() =>
-                  abrirSecaoLancamentos('entradas')
-                }
+                onClick={() => {
+                  abrirSecaoLancamentos('entradas');
+                  fecharMenuMobile();
+                }}
               >
                 Entradas
               </button>
 
               <button
                 type="button"
-                onClick={() =>
-                  abrirSecaoLancamentos('fixas')
-                }
+                onClick={() => {
+                  abrirSecaoLancamentos('fixas');
+                  fecharMenuMobile();
+                }}
               >
                 Contas fixas
               </button>
 
               <button
                 type="button"
-                onClick={() =>
-                  abrirSecaoLancamentos('parcelados')
-                }
+                onClick={() => {
+                  abrirSecaoLancamentos('parcelados');
+                  fecharMenuMobile();
+                }}
               >
                 Parcelados
               </button>
 
               <button
                 type="button"
-                onClick={() =>
-                  abrirSecaoLancamentos('gastos')
-                }
+                onClick={() => {
+                  abrirSecaoLancamentos('gastos');
+                  fecharMenuMobile();
+                }}
               >
                 Gastos do mês
               </button>
@@ -168,9 +246,10 @@ function Sidebar({
               ? 'active'
               : ''
           }
-          onClick={() =>
-            mudarPagina('relatorios')
-          }
+          onClick={() => {
+            mudarPagina('relatorios');
+            fecharMenuMobile();
+          }}
         >
           Relatórios
         </a>
@@ -183,24 +262,37 @@ function Sidebar({
                 : ''
             }
             onClick={() =>
-              mudarPagina('investimentos')
+              alternarGrupo(
+                'investimentos'
+              )
             }
           >
-            Investimentos
+            <span>
+              Investimentos
+            </span>
+
+            <span className="sidebar-chevron">
+              {grupoAberto ===
+                'investimentos'
+                ? '⌃'
+                : '⌄'
+              }
+            </span>
           </a>
 
-          {paginaAtual === 'investimentos' && (
+          {grupoAberto === 'investimentos' && (
             <div className="sidebar-submenu">
               {configuracoes.caixinhas.map(
                 (caixinha) => (
                   <button
                     type="button"
                     key={caixinha.id}
-                    onClick={() =>
+                    onClick={() => {
                       abrirCaixinhaInvestimento(
                         caixinha.id
-                      )
-                    }
+                      );
+                      fecharMenuMobile();
+                    }}
                   >
                     {caixinha.nome}
                   </button>
@@ -218,48 +310,74 @@ function Sidebar({
                 : ''
             }
             onClick={() =>
-              mudarPagina('configuracoes')
+              alternarGrupo(
+                'configuracoes'
+              )
             }
           >
-            Configurações
+            <span>
+              Configurações
+            </span>
+
+            <span className="sidebar-chevron">
+              {grupoAberto ===
+                'configuracoes'
+                ? '⌃'
+                : '⌄'
+              }
+            </span>
           </a>
 
-          {paginaAtual === 'configuracoes' && (
+          {grupoAberto === 'configuracoes' && (
             <div className="sidebar-submenu">
               <button
                 type="button"
-                onClick={() =>
-                  abrirConfiguracao('perfil')
-                }
+                onClick={() => {
+                  abrirConfiguracao('perfil');
+                  fecharMenuMobile();
+                }}
               >
                 Perfil
               </button>
 
               <button
                 type="button"
-                onClick={() =>
-                  abrirConfiguracao('aparencia')
-                }
+                onClick={() => {
+                  abrirConfiguracao('aparencia');
+                  fecharMenuMobile();
+                }}
               >
                 Aparência
               </button>
 
               <button
                 type="button"
-                onClick={() =>
-                  abrirConfiguracao('caixinhas')
-                }
+                onClick={() => {
+                  abrirConfiguracao('caixinhas');
+                  fecharMenuMobile();
+                }}
               >
                 Caixinhas
               </button>
 
               <button
                 type="button"
-                onClick={() =>
-                  abrirConfiguracao('categorias')
-                }
+                onClick={() => {
+                  abrirConfiguracao('categorias');
+                  fecharMenuMobile();
+                }}
               >
                 Categorias
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  abrirConfiguracao('formas-pagamento');
+                  fecharMenuMobile();
+                }}
+              >
+                Formas de pagamento
               </button>
             </div>
           )}

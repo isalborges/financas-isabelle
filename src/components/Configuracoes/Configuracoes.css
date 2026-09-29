@@ -281,3 +281,47 @@
 
   padding-bottom: 10px;
 }
+.config-obrigatoria {
+  display: inline-flex;
+  margin-left: 7px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+@media (max-width: 760px) {
+  .config-secao {
+    scroll-margin-top: 90px;
+  }
+
+  .config-titulo {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .config-categorias {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .config-categoria {
+    width: 100%;
+    min-height: 44px;
+    justify-content: space-between;
+    border-radius: 12px;
+  }
+
+  .config-categoria > span {
+    min-width: 0;
+  }
+
+  .config-adicionar .btn-secondary,
+  .config-salvar-final .btn-primary {
+    width: 100%;
+  }
+}

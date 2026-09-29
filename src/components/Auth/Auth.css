@@ -264,3 +264,69 @@
     gap: 10px;
   }
 }
+
+/* LOGIN / CADASTRO COM GOOGLE */
+
+.auth-ou {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: #aaa;
+  font-size: 12px;
+  text-align: center;
+}
+
+.auth-ou::before,
+.auth-ou::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #eee5e8;
+}
+
+.auth-ou span {
+  flex: 0 0 auto;
+}
+
+.auth-google {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  padding: 11px 16px;
+  border: 1px solid #e4dfe1;
+  border-radius: 14px;
+  background: #fff;
+  color: #2e292b;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.auth-google:hover {
+  border-color: #d8c8ce;
+  background: #fff9fb;
+}
+
+.auth-google:active {
+  transform: scale(0.99);
+}
+
+.auth-google:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.auth-google-icone {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}

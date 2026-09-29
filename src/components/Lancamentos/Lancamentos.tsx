@@ -850,9 +850,21 @@ function Lancamentos({
 
     }
 
+    const parcelaNoCredito =
+      lancamento.parcelado &&
+      (
+        lancamento.formaPagamento ===
+          'Crédito' ||
+        lancamento.formaPagamento ===
+          'Cartão'
+      );
+
     if (
 
-      lancamento.parcelado ||
+      (
+        lancamento.parcelado &&
+        !parcelaNoCredito
+      ) ||
 
       lancamento.formaPagamento ===
 
@@ -1943,14 +1955,22 @@ function Lancamentos({
 
     }
 
+    const parcelaNoCredito =
+      lancamento.parcelado &&
+      (
+        lancamento.formaPagamento ===
+          'Crédito' ||
+        lancamento.formaPagamento ===
+          'Cartão'
+      );
+
     if (
-
-      !lancamento.parcelado &&
-
-      lancamento.formaPagamento !==
-
-        'PIX'
-
+      parcelaNoCredito ||
+      (
+        !lancamento.parcelado &&
+        lancamento.formaPagamento !==
+          'PIX'
+      )
     ) {
 
       return;
@@ -2121,6 +2141,15 @@ function Lancamentos({
 
       );
 
+    const parcelaNoCredito =
+      lancamento.parcelado &&
+      (
+        lancamento.formaPagamento ===
+          'Crédito' ||
+        lancamento.formaPagamento ===
+          'Cartão'
+      );
+
     const statusManual =
 
       lancamento.tipo ===
@@ -2129,7 +2158,10 @@ function Lancamentos({
 
       (
 
-        lancamento.parcelado ||
+        (
+          lancamento.parcelado &&
+          !parcelaNoCredito
+        ) ||
 
         lancamento.formaPagamento ===
 
@@ -2821,101 +2853,35 @@ function Lancamentos({
                 </label>
 
                 <select
-
                   value={
-
                     formaPagamento
-
                   }
-
-                  onChange={(e) => {
-
-                    const valorSelecionado =
-
-                      e.target.value;
-
-                    if (
-
-                      valorSelecionado ===
-
-                        'PIX' ||
-
-                      valorSelecionado ===
-
-                        'Cartão' ||
-
-                      valorSelecionado ===
-
-                        'Débito' ||
-
-                      valorSelecionado ===
-
-                        'Dinheiro' ||
-
-                      valorSelecionado ===
-
-                        'Boleto'
-
-                    ) {
-
-                      setFormaPagamento(
-
-                        valorSelecionado
-
-                      );
-
-                    }
-
-                    else {
-
-                      setFormaPagamento(
-
-                        'Outro'
-
-                      );
-
-                    }
-
-                  }}
-
+                  onChange={(e) =>
+                    setFormaPagamento(
+                      e.target.value
+                    )
+                  }
                 >
+                  {formaPagamento ===
+                    'Cartão' &&
+                    !configuracoes.formasPagamento.includes(
+                      'Cartão'
+                    ) && (
+                    <option value="Cartão">
+                      Cartão (lançamento antigo)
+                    </option>
+                  )}
 
-                  <option value="PIX">
-
-                    PIX
-
-                  </option>
-
-                  <option value="Cartão">
-
-                    Cartão
-
-                  </option>
-
-                  <option value="Débito">
-
-                    Débito
-
-                  </option>
-
-                  <option value="Dinheiro">
-
-                    Dinheiro
-
-                  </option>
-
-                  <option value="Boleto">
-
-                    Boleto
-
-                  </option>
-
-                  <option value="Outro">
-
-                    Outro
-
-                  </option>
-
+                  {configuracoes.formasPagamento.map(
+                    (formaDisponivel) => (
+                      <option
+                        key={formaDisponivel}
+                        value={formaDisponivel}
+                      >
+                        {formaDisponivel}
+                      </option>
+                    )
+                  )}
                 </select>
 
               </div>

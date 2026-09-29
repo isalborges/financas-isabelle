@@ -350,11 +350,23 @@ function Dashboard({
       Lancamento
   ) {
 
+    const parcelaNoCredito =
+      lancamento.parcelado &&
+      (
+        lancamento.formaPagamento ===
+          'Crédito' ||
+        lancamento.formaPagamento ===
+          'Cartão'
+      );
+
     return (
       lancamento.tipo ===
         'Saída' &&
       (
-        lancamento.parcelado ||
+        (
+          lancamento.parcelado &&
+          !parcelaNoCredito
+        ) ||
         lancamento.formaPagamento ===
           'PIX'
       )
@@ -627,8 +639,12 @@ function Dashboard({
     lancamentosDoMes
       .filter(
         (lancamento) =>
-          statusManual(
-            lancamento
+          lancamento.tipo ===
+            'Saída' &&
+          (
+            lancamento.parcelado ||
+            lancamento.formaPagamento ===
+              'PIX'
           )
       )
       .sort(
@@ -907,7 +923,17 @@ function Dashboard({
                           {' • '}
 
                           {pago
-                            ? 'Pago'
+                            ? (
+                                lancamento.parcelado &&
+                                (
+                                  lancamento.formaPagamento ===
+                                    'Crédito' ||
+                                  lancamento.formaPagamento ===
+                                    'Cartão'
+                                )
+                                  ? 'Pago automaticamente • Crédito'
+                                  : 'Pago'
+                              )
                             : lancamento.parcelado
                               ? 'Parcela pendente'
                               : 'PIX pendente'
@@ -996,92 +1022,180 @@ function Dashboard({
             </p>
           </div>
         ) : (
-          <div className="tabela-container">
-            <table className="historico-tabela">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Descrição</th>
-                  <th>Detalhe</th>
-                  <th>Tipo</th>
-                  <th>Valor</th>
-                </tr>
-              </thead>
+          <>
+            <div className="tabela-container historico-desktop">
+              <table className="historico-tabela">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Detalhe</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                  </tr>
+                </thead>
 
-              <tbody>
-                {historicoMes.map((item) => {
-                  const valorPositivo =
-                    item.tipo === 'entrada' ||
-                    item.tipo === 'retirada';
+                <tbody>
+                  {historicoMes.map((item) => {
+                    const valorPositivo =
+                      item.tipo === 'entrada' ||
+                      item.tipo === 'retirada';
 
-                  const textoTipo =
-                    item.tipo === 'entrada'
-                      ? 'Entrada'
-                      : item.tipo === 'saida'
-                        ? 'Saída'
-                        : item.tipo === 'aporte'
-                          ? 'Investimento'
-                          : 'Retirada';
+                    const textoTipo =
+                      item.tipo === 'entrada'
+                        ? 'Entrada'
+                        : item.tipo === 'saida'
+                          ? 'Saída'
+                          : item.tipo === 'aporte'
+                            ? 'Investimento'
+                            : 'Retirada';
 
-                  return (
-                    <tr
-                      key={item.id}
-                      className={
-                        item.origem === 'lancamento'
-                          ? 'linha-lancamento'
-                          : ''
-                      }
-                      onClick={() => {
-                        if (
-                          item.origem === 'lancamento' &&
-                          item.lancamentoId
-                        ) {
-                          abrirLancamentos(
-                            item.lancamentoId
-                          );
+                    return (
+                      <tr
+                        key={item.id}
+                        className={
+                          item.origem === 'lancamento'
+                            ? 'linha-lancamento'
+                            : ''
                         }
-                      }}
-                    >
-                      <td>
-                        {item.data}
-                      </td>
-
-                      <td>
-                        {item.descricao}
-                      </td>
-
-                      <td>
-                        {item.detalhe}
-                      </td>
-
-                      <td>
-                        <span
-                          className={`historico-badge historico-badge-${item.tipo}`}
-                        >
-                          {textoTipo}
-                        </span>
-                      </td>
-
-                      <td>
-                        <strong
-                          className={
-                            valorPositivo
-                              ? 'historico-valor positivo'
-                              : 'historico-valor negativo'
+                        onClick={() => {
+                          if (
+                            item.origem === 'lancamento' &&
+                            item.lancamentoId
+                          ) {
+                            abrirLancamentos(
+                              item.lancamentoId
+                            );
                           }
-                        >
-                          {valorPositivo ? '+ ' : '- '}
-                          {formatarValor(
-                            item.valor
-                          )}
+                        }}
+                      >
+                        <td>
+                          {item.data}
+                        </td>
+
+                        <td>
+                          {item.descricao}
+                        </td>
+
+                        <td>
+                          {item.detalhe}
+                        </td>
+
+                        <td>
+                          <span
+                            className={`historico-badge historico-badge-${item.tipo}`}
+                          >
+                            {textoTipo}
+                          </span>
+                        </td>
+
+                        <td>
+                          <strong
+                            className={
+                              valorPositivo
+                                ? 'historico-valor positivo'
+                                : 'historico-valor negativo'
+                            }
+                          >
+                            {valorPositivo ? '+ ' : '- '}
+                            {formatarValor(
+                              item.valor
+                            )}
+                          </strong>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="historico-mobile-lista">
+              {historicoMes.map((item) => {
+                const valorPositivo =
+                  item.tipo === 'entrada' ||
+                  item.tipo === 'retirada';
+
+                const textoTipo =
+                  item.tipo === 'entrada'
+                    ? 'Entrada'
+                    : item.tipo === 'saida'
+                      ? 'Saída'
+                      : item.tipo === 'aporte'
+                        ? 'Investimento'
+                        : 'Retirada';
+
+                const clicavel =
+                  item.origem === 'lancamento' &&
+                  Boolean(item.lancamentoId);
+
+                return (
+                  <button
+                    type="button"
+                    key={item.id}
+                    className={`historico-mobile-item ${
+                      clicavel
+                        ? 'clicavel'
+                        : ''
+                    }`}
+                    onClick={() => {
+                      if (
+                        clicavel &&
+                        item.lancamentoId
+                      ) {
+                        abrirLancamentos(
+                          item.lancamentoId
+                        );
+                      }
+                    }}
+                  >
+                    <div className="historico-mobile-topo">
+                      <span className="historico-mobile-data">
+                        {item.data}
+                      </span>
+
+                      <span
+                        className={`historico-badge historico-badge-${item.tipo}`}
+                      >
+                        {textoTipo}
+                      </span>
+                    </div>
+
+                    <div className="historico-mobile-corpo">
+                      <div className="historico-mobile-textos">
+                        <strong>
+                          {item.descricao}
                         </strong>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+
+                        <span>
+                          {item.detalhe}
+                        </span>
+                      </div>
+
+                      <strong
+                        className={
+                          valorPositivo
+                            ? 'historico-valor positivo'
+                            : 'historico-valor negativo'
+                        }
+                      >
+                        {valorPositivo ? '+ ' : '- '}
+                        {formatarValor(
+                          item.valor
+                        )}
+                      </strong>
+                    </div>
+
+                    {clicavel && (
+                      <span className="historico-mobile-editar">
+                        Toque para editar
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </>
         )}
       </section>
     </section>
