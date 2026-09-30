@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useState
 } from 'react';
 
@@ -22,6 +23,9 @@ type InvestimentosProps = {
   movimentacoes:
     MovimentacaoInvestimento[];
 
+  userId:
+    string;
+
   adicionarMovimentacao:
     (
       movimentacao:
@@ -29,6 +33,12 @@ type InvestimentosProps = {
           MovimentacaoInvestimento,
           'id'
         >
+    ) => Promise<boolean>;
+
+  editarMovimentacao:
+    (
+      movimentacao:
+        MovimentacaoInvestimento
     ) => Promise<boolean>;
 
   excluirMovimentacao:
@@ -58,7 +68,9 @@ type TipoMovimentacao =
 function Investimentos({
   lancamentos,
   movimentacoes,
+  userId,
   adicionarMovimentacao,
+  editarMovimentacao,
   excluirMovimentacao,
   configuracoes,
   mesSelecionado,
@@ -74,6 +86,19 @@ function Investimentos({
     useState(
       false
     );
+
+  const [
+    movimentacaoEditando,
+    setMovimentacaoEditando
+  ] =
+    useState<
+      MovimentacaoInvestimento | null
+    >(
+      null
+    );
+
+  const chaveRascunhoMovimentacao =
+    `controle-financeiro-rascunho-investimento-${userId}`;
 
   const primeiraCaixinha =
     configuracoes
@@ -344,7 +369,9 @@ function Investimentos({
 
   function saldoCaixinha(
     caixinha:
-      string
+      string,
+    ignorarMovimentacaoId?:
+      number
   ) {
 
     return movimentacoesAteMes
@@ -354,7 +381,9 @@ function Investimentos({
           movimentacao
         ) =>
           movimentacao.caixinha ===
-          caixinha
+            caixinha &&
+          movimentacao.id !==
+            ignorarMovimentacaoId
       )
 
       .reduce(
@@ -445,6 +474,14 @@ function Investimentos({
         'aporte'
   ) {
 
+    localStorage.removeItem(
+      chaveRascunhoMovimentacao
+    );
+
+    setMovimentacaoEditando(
+      null
+    );
+
     setCaixinhaSelecionada(
       caixinha
     );
@@ -467,10 +504,52 @@ function Investimentos({
 
   }
 
+  function abrirEdicaoMovimentacao(
+    movimentacao:
+      MovimentacaoInvestimento
+  ) {
+
+    setMovimentacaoEditando(
+      movimentacao
+    );
+
+    setCaixinhaSelecionada(
+      movimentacao.caixinha
+    );
+
+    setTipoMovimentacao(
+      movimentacao.tipo
+    );
+
+    setValorMovimentacao(
+      movimentacao.valor
+        .toString()
+    );
+
+    setDataMovimentacao(
+      movimentacao.data
+    );
+
+    setErroMovimentacao('');
+
+    setMostrarFormulario(
+      true
+    );
+
+  }
+
   function cancelarMovimentacao() {
+
+    localStorage.removeItem(
+      chaveRascunhoMovimentacao
+    );
 
     setMostrarFormulario(
       false
+    );
+
+    setMovimentacaoEditando(
+      null
     );
 
     setValorMovimentacao('');
@@ -534,7 +613,8 @@ function Investimentos({
         'retirada' &&
       valor >
         saldoCaixinha(
-          caixinhaSelecionada
+          caixinhaSelecionada,
+          movimentacaoEditando?.id
         )
     ) {
 
@@ -546,16 +626,26 @@ function Investimentos({
 
     }
 
+    const dadosMovimentacao = {
+      caixinha:
+        caixinhaSelecionada,
+      tipo:
+        tipoMovimentacao,
+      valor,
+      data:
+        dataMovimentacao
+    };
+
     const sucesso =
-      await adicionarMovimentacao({
-        caixinha:
-          caixinhaSelecionada,
-        tipo:
-          tipoMovimentacao,
-        valor,
-        data:
-          dataMovimentacao
-      });
+      movimentacaoEditando
+        ? await editarMovimentacao({
+            id:
+              movimentacaoEditando.id,
+            ...dadosMovimentacao
+          })
+        : await adicionarMovimentacao(
+            dadosMovimentacao
+          );
 
     if (
       sucesso
@@ -564,6 +654,125 @@ function Investimentos({
     }
 
   }
+
+  useEffect(
+    () => {
+      const rascunho =
+        localStorage.getItem(
+          chaveRascunhoMovimentacao
+        );
+
+      if (
+        !rascunho
+      ) {
+        return;
+      }
+
+      try {
+        const dados =
+          JSON.parse(
+            rascunho
+          ) as {
+            aberto?: boolean;
+            caixinhaSelecionada?: string;
+            tipoMovimentacao?: TipoMovimentacao;
+            valorMovimentacao?: string;
+            dataMovimentacao?: string;
+            movimentacaoEditandoId?: number | null;
+          };
+
+        if (
+          !dados.aberto
+        ) {
+          return;
+        }
+
+        const editando =
+          dados.movimentacaoEditandoId
+            ? movimentacoes.find(
+                (
+                  movimentacao
+                ) =>
+                  movimentacao.id ===
+                  dados.movimentacaoEditandoId
+              ) ?? null
+            : null;
+
+        setMovimentacaoEditando(
+          editando
+        );
+
+        setCaixinhaSelecionada(
+          dados.caixinhaSelecionada ??
+            primeiraCaixinha
+        );
+
+        setTipoMovimentacao(
+          dados.tipoMovimentacao ??
+            'aporte'
+        );
+
+        setValorMovimentacao(
+          dados.valorMovimentacao ??
+            ''
+        );
+
+        setDataMovimentacao(
+          dados.dataMovimentacao ??
+            `${mesSelecionado}-01`
+        );
+
+        setMostrarFormulario(
+          true
+        );
+      }
+      catch {
+        localStorage.removeItem(
+          chaveRascunhoMovimentacao
+        );
+      }
+    },
+    [
+      chaveRascunhoMovimentacao,
+      movimentacoes,
+      primeiraCaixinha,
+      mesSelecionado
+    ]
+  );
+
+  useEffect(
+    () => {
+      if (
+        !mostrarFormulario
+      ) {
+        return;
+      }
+
+      localStorage.setItem(
+        chaveRascunhoMovimentacao,
+        JSON.stringify({
+          aberto:
+            true,
+          caixinhaSelecionada,
+          tipoMovimentacao,
+          valorMovimentacao,
+          dataMovimentacao,
+          movimentacaoEditandoId:
+            movimentacaoEditando?.id ??
+            null
+        })
+      );
+    },
+    [
+      mostrarFormulario,
+      caixinhaSelecionada,
+      tipoMovimentacao,
+      valorMovimentacao,
+      dataMovimentacao,
+      movimentacaoEditando,
+      chaveRascunhoMovimentacao
+    ]
+  );
 
   async function confirmarExclusaoMovimentacao(
     id:
@@ -714,12 +923,17 @@ function Investimentos({
               <div>
 
                 <h2>
-                  Nova movimentação
+                  {movimentacaoEditando
+                    ? 'Editar movimentação'
+                    : 'Nova movimentação'
+                  }
                 </h2>
 
                 <p>
-                  Registre um aporte
-                  ou uma retirada.
+                  {movimentacaoEditando
+                    ? 'Atualize os dados desta movimentação.'
+                    : 'Registre um aporte ou uma retirada.'
+                  }
                 </p>
 
               </div>
@@ -934,12 +1148,12 @@ function Investimentos({
                 }
               >
 
-                {tipoMovimentacao ===
-                  'aporte'
-
-                  ? 'Adicionar aporte'
-
-                  : 'Registrar retirada'
+                {movimentacaoEditando
+                  ? 'Salvar alterações'
+                  : tipoMovimentacao ===
+                      'aporte'
+                    ? 'Adicionar aporte'
+                    : 'Registrar retirada'
                 }
 
               </button>
@@ -1331,11 +1545,34 @@ function Investimentos({
               ) => (
 
                 <div
-                  className="item-aporte"
+                  className="item-aporte item-aporte-clicavel"
 
                   key={
                     movimentacao.id
                   }
+
+                  role="button"
+
+                  tabIndex={0}
+
+                  onClick={() =>
+                    abrirEdicaoMovimentacao(
+                      movimentacao
+                    )
+                  }
+
+                  onKeyDown={(evento) => {
+                    if (
+                      evento.key === 'Enter' ||
+                      evento.key === ' '
+                    ) {
+                      evento.preventDefault();
+
+                      abrirEdicaoMovimentacao(
+                        movimentacao
+                      );
+                    }
+                  }}
                 >
 
                   <div className="aporte-info">
@@ -1398,11 +1635,13 @@ function Investimentos({
                     <button
                       className="btn-excluir"
 
-                      onClick={() =>
+                      onClick={(evento) => {
+                        evento.stopPropagation();
+
                         confirmarExclusaoMovimentacao(
                           movimentacao.id
-                        )
-                      }
+                        );
+                      }}
 
                       title="Excluir movimentação"
                     >

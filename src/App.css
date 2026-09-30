@@ -206,7 +206,7 @@ body {
 
 }
 
-/* CONTEÃšDO */
+/* CONTEÃƒÅ¡DO */
 
 .content {
 
@@ -342,7 +342,7 @@ body {
 
 }
 
-/* TÃTULOS */
+/* TÃƒÂTULOS */
 
 .card h2 {
 
@@ -380,7 +380,7 @@ body {
 
 }
 
-/* PÃGINA */
+/* PÃƒÂGINA */
 
 .page {
 
@@ -420,7 +420,7 @@ body {
 
 }
 
-/* BOTÃ•ES */
+/* BOTÃƒâ€¢ES */
 
 .btn-primary {
 
@@ -478,7 +478,7 @@ body {
 
 }
 
-/* FORMULÃRIO */
+/* FORMULÃƒÂRIO */
 
 .formulario h2 {
 
@@ -656,7 +656,7 @@ body {
 
 }
 
-/* SEÃ‡Ã•ES LANÃ‡AMENTOS */
+/* SEÃƒâ€¡Ãƒâ€¢ES LANÃƒâ€¡AMENTOS */
 
 .secao-lancamentos {
 
@@ -782,7 +782,7 @@ body {
 
 }
 
-/* NAVEGAÃ‡ÃƒO MÃŠS */
+/* NAVEGAÃƒâ€¡ÃƒÆ’O MÃƒÅ S */
 
 .mes-navegacao {
 
@@ -848,7 +848,7 @@ body {
 
 }
 
-/* SEM LANÃ‡AMENTOS */
+/* SEM LANÃƒâ€¡AMENTOS */
 
 .sem-lancamentos {
 
@@ -874,7 +874,7 @@ body {
 
 }
 
-/* RECORRÃŠNCIA / PARCELAS */
+/* RECORRÃƒÅ NCIA / PARCELAS */
 
 .campo-opcional {
 
@@ -950,7 +950,7 @@ body {
 
 }
 
-/* VALIDAÃ‡ÃƒO */
+/* VALIDAÃƒâ€¡ÃƒÆ’O */
 
 .alerta-formulario {
 
@@ -1052,7 +1052,7 @@ body {
 
 }
 
-/* PENDÃŠNCIAS DASHBOARD */
+/* PENDÃƒÅ NCIAS DASHBOARD */
 
 .titulo-pendencias {
 
@@ -1538,7 +1538,7 @@ body {
 
 /* ================================= */
 
-/* RELATÃ“RIOS                        */
+/* RELATÃƒâ€œRIOS                        */
 
 /* ================================= */
 
@@ -1594,7 +1594,7 @@ body {
 
 }
 
-/* SALDOS RELATÃ“RIO */
+/* SALDOS RELATÃƒâ€œRIO */
 
 .relatorio-saldos {
 
@@ -1656,7 +1656,7 @@ body {
 
 }
 
-/* COMPARAÃ‡ÃƒO */
+/* COMPARAÃƒâ€¡ÃƒÆ’O */
 
 .comparacao-mensal {
 
@@ -1706,7 +1706,7 @@ body {
 
 }
 
-/* GRÃFICOS */
+/* GRÃƒÂFICOS */
 
 .relatorios-graficos {
 
@@ -2172,7 +2172,7 @@ body {
 }
 
 /* ================================= */
-/* AJUSTE DE ESPAÃ‡AMENTO INVESTIMENTOS */
+/* AJUSTE DE ESPAÃƒâ€¡AMENTO INVESTIMENTOS */
 /* ================================= */
 
 .investimentos-cards {
@@ -2283,7 +2283,7 @@ body {
   color: #826a73;
 }
 
-/* CONFIRMAÃ‡ÃƒO DE CONFIGURAÃ‡Ã•ES */
+/* CONFIRMAÃƒâ€¡ÃƒÆ’O DE CONFIGURAÃƒâ€¡Ãƒâ€¢ES */
 
 .config-sucesso-popup {
   position: fixed;
@@ -2360,7 +2360,7 @@ body {
   }
 }
 
-/* TOTAIS DAS SEÃ‡Ã•ES DE LANÃ‡AMENTOS */
+/* TOTAIS DAS SEÃƒâ€¡Ãƒâ€¢ES DE LANÃƒâ€¡AMENTOS */
 
 .total-secao.total-entrada {
   color: #3d9b6b;
@@ -2371,7 +2371,7 @@ body {
   color: #3f7b58;
 }
 
-/* NAVEGAÃ‡ÃƒO DIRETA PARA CAIXINHAS */
+/* NAVEGAÃƒâ€¡ÃƒÆ’O DIRETA PARA CAIXINHAS */
 
 .caixinha-card {
   scroll-margin-top: 24px;
@@ -2402,7 +2402,7 @@ body {
   color: var(--accent-hover);
 }
 
-/* NAVEGAÃ‡ÃƒO DIRETA EM LANÃ‡AMENTOS */
+/* NAVEGAÃƒâ€¡ÃƒÆ’O DIRETA EM LANÃƒâ€¡AMENTOS */
 
 #lancamentos-fixas,
 #lancamentos-parcelados,
@@ -2411,7 +2411,7 @@ body {
   scroll-margin-top: 24px;
 }
 
-/* HISTÃ“RICO DO MÃŠS â€” FORMATO DE LISTA/TABELA */
+/* HISTÃƒâ€œRICO DO MÃƒÅ S Ã¢â‚¬â€ FORMATO DE LISTA/TABELA */
 
 .historico-mes-topo {
   display: flex;
@@ -2487,7 +2487,7 @@ body {
   color: var(--accent);
 }
 
-/* PAGAMENTOS JÃ CONCLUÃDOS NAS PENDÃŠNCIAS */
+/* PAGAMENTOS JÃƒÂ CONCLUÃƒÂDOS NAS PENDÃƒÅ NCIAS */
 
 .item-pendencia-pago {
   opacity: 0.68;
@@ -2509,7 +2509,7 @@ body {
   font-weight: 700;
 }
 
-/* CABEÃ‡ALHOS MAIS LIMPOS */
+/* CABEÃƒâ€¡ALHOS MAIS LIMPOS */
 
 .page-actions-only {
   display: flex;
@@ -2528,7 +2528,7 @@ body {
   }
 }
 
-/* NOVA MOVIMENTAÃ‡ÃƒO DENTRO DOS CARDS */
+/* NOVA MOVIMENTAÃƒâ€¡ÃƒÆ’O DENTRO DOS CARDS */
 
 .btn-card-movimentacao {
   flex-shrink: 0;
@@ -2569,7 +2569,7 @@ body {
   }
 }
 
-/* BOTÃƒO NOVA MOVIMENTAÃ‡ÃƒO FORA DOS CARDS */
+/* BOTÃƒÆ’O NOVA MOVIMENTAÃƒâ€¡ÃƒÆ’O FORA DOS CARDS */
 
 .secao-lancamentos-bloco {
   display: flex;
@@ -2597,7 +2597,7 @@ body {
   }
 }
 
-/* AUTENTICAÃ‡ÃƒO / USUÃRIO */
+/* AUTENTICAÃƒâ€¡ÃƒÆ’O / USUÃƒÂRIO */
 
 .auth-carregando {
   min-height: 100vh;
@@ -2647,7 +2647,7 @@ body {
   color: var(--accent-hover);
 }
 
-/* AVATAR DO USUÃRIO NA SIDEBAR */
+/* AVATAR DO USUÃƒÂRIO NA SIDEBAR */
 
 .avatar {
   overflow: hidden;
@@ -2665,7 +2665,7 @@ body {
   line-height: 1;
 }
 
-/* PERFIL EM CONFIGURAÃ‡Ã•ES */
+/* PERFIL EM CONFIGURAÃƒâ€¡Ãƒâ€¢ES */
 
 #config-perfil {
   scroll-margin-top: 24px;
@@ -2890,7 +2890,7 @@ body {
   }
 }
 
-/* CONFIGURAÃ‡Ã•ES â€” APARÃŠNCIA */
+/* CONFIGURAÃƒâ€¡Ãƒâ€¢ES Ã¢â‚¬â€ APARÃƒÅ NCIA */
 
 #config-aparencia {
   scroll-margin-top: 24px;
@@ -2991,7 +2991,7 @@ body {
 }
 
 /* ================================= */
-/* MODO ESCURO â€” CONTRASTE REFORÃ‡ADO */
+/* MODO ESCURO Ã¢â‚¬â€ CONTRASTE REFORÃƒâ€¡ADO */
 /* ================================= */
 
 /*
@@ -3013,7 +3013,7 @@ body {
   color: var(--text-main);
 }
 
-/* TÃ­tulos e textos */
+/* TÃƒÂ­tulos e textos */
 
 :root[data-theme-mode='escuro'] h1,
 :root[data-theme-mode='escuro'] h2,
@@ -3054,7 +3054,7 @@ body {
   border-color: var(--border-main);
 }
 
-/* Tabelas â€” remove os fundos brancos das linhas */
+/* Tabelas Ã¢â‚¬â€ remove os fundos brancos das linhas */
 
 :root[data-theme-mode='escuro'] .tabela table,
 :root[data-theme-mode='escuro'] .tabela-container table,
@@ -3099,7 +3099,7 @@ body {
   background: var(--surface-muted);
 }
 
-/* Valores e informaÃ§Ãµes da tabela */
+/* Valores e informaÃƒÂ§ÃƒÂµes da tabela */
 
 :root[data-theme-mode='escuro'] .status-neutro,
 :root[data-theme-mode='escuro'] .campo-opcional {
@@ -3112,7 +3112,7 @@ body {
   color: #d5ced2;
 }
 
-/* PendÃªncias â€” os itens eram brancos */
+/* PendÃƒÂªncias Ã¢â‚¬â€ os itens eram brancos */
 
 :root[data-theme-mode='escuro'] .item-pendencia {
   background: #29262a;
@@ -3138,7 +3138,7 @@ body {
   color: var(--text-main);
 }
 
-/* Dashboard e relatÃ³rios */
+/* Dashboard e relatÃƒÂ³rios */
 
 :root[data-theme-mode='escuro'] .cards h3,
 :root[data-theme-mode='escuro'] .saldo h2,
@@ -3172,7 +3172,7 @@ body {
   color: #f0a0bd;
 }
 
-/* Seletor de mÃªs */
+/* Seletor de mÃƒÂªs */
 
 :root[data-theme-mode='escuro'] .mes-atual {
   color: #f1edf0;
@@ -3204,7 +3204,7 @@ body {
   color: #817a7e;
 }
 
-/* BotÃµes e superfÃ­cies auxiliares */
+/* BotÃƒÂµes e superfÃƒÂ­cies auxiliares */
 
 :root[data-theme-mode='escuro'] .btn-secondary {
   border-color: var(--border-main);
@@ -3258,7 +3258,7 @@ body {
   color: var(--accent);
 }
 
-/* Modo "Sistema" quando o prÃ³prio dispositivo estiver no escuro */
+/* Modo "Sistema" quando o prÃƒÂ³prio dispositivo estiver no escuro */
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme-mode='sistema'] {
@@ -3390,10 +3390,10 @@ body {
 }
 
 /* ================================= */
-/* MODO ESCURO â€” AJUSTES DE CONTRASTE V2 */
+/* MODO ESCURO Ã¢â‚¬â€ AJUSTES DE CONTRASTE V2 */
 /* ================================= */
 
-/* GRÃFICOS RECHARTS */
+/* GRÃƒÂFICOS RECHARTS */
 
 :root[data-theme-mode='escuro'] .recharts-cartesian-axis-tick-value,
 :root[data-theme-mode='escuro'] .recharts-text {
@@ -3421,7 +3421,7 @@ body {
   color: #f5f2f4 !important;
 }
 
-/* CONFIGURAÃ‡Ã•ES â€” CAIXINHAS */
+/* CONFIGURAÃƒâ€¡Ãƒâ€¢ES Ã¢â‚¬â€ CAIXINHAS */
 
 :root[data-theme-mode='escuro'] .config-caixinha {
   background: #29262a;
@@ -3445,7 +3445,7 @@ body {
   color: #91888d;
 }
 
-/* CONFIGURAÃ‡Ã•ES â€” CATEGORIAS */
+/* CONFIGURAÃƒâ€¡Ãƒâ€¢ES Ã¢â‚¬â€ CATEGORIAS */
 
 :root[data-theme-mode='escuro'] .config-categoria {
   background: #302d31;
@@ -3462,7 +3462,7 @@ body {
   background: #383439;
 }
 
-/* ÃCONE DA CAIXINHA */
+/* ÃƒÂCONE DA CAIXINHA */
 
 :root[data-theme-mode='escuro'] .caixinha-icone {
   background: color-mix(
@@ -3473,7 +3473,7 @@ body {
   color: #e8c3d0;
 }
 
-/* BOTÃ•ES DE TEMA */
+/* BOTÃƒâ€¢ES DE TEMA */
 
 :root[data-theme-mode='escuro'] .tema-cor-opcao,
 :root[data-theme-mode='escuro'] .tema-modo-opcao {
@@ -3504,7 +3504,7 @@ body {
   color: #fff;
 }
 
-/* BADGES DE TIPO / HISTÃ“RICO */
+/* BADGES DE TIPO / HISTÃƒâ€œRICO */
 
 :root[data-theme-mode='escuro'] .historico-badge,
 :root[data-theme-mode='escuro'] .badge-recorrente,
@@ -3557,7 +3557,7 @@ body {
   color: #ef9fbc;
 }
 
-/* TEXTO DOS CAMPOS E AJUDAS EM CONFIGURAÃ‡Ã•ES */
+/* TEXTO DOS CAMPOS E AJUDAS EM CONFIGURAÃƒâ€¡Ãƒâ€¢ES */
 
 :root[data-theme-mode='escuro'] .config-caixinha-rodape,
 :root[data-theme-mode='escuro'] .config-caixinha-rodape small,
@@ -3566,7 +3566,7 @@ body {
   color: #b9b0b5;
 }
 
-/* MODO SISTEMA â€” MESMOS AJUSTES QUANDO O SO ESTIVER ESCURO */
+/* MODO SISTEMA Ã¢â‚¬â€ MESMOS AJUSTES QUANDO O SO ESTIVER ESCURO */
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme-mode='sistema'] .recharts-cartesian-axis-tick-value,
@@ -3653,12 +3653,12 @@ body {
 }
 
 /* ================================= */
-/* MODO ESCURO â€” SELETOR DE MÃŠS */
+/* MODO ESCURO Ã¢â‚¬â€ SELETOR DE MÃƒÅ S */
 /* ================================= */
 
 /*
-  O texto do mÃªs possui estilos mais especÃ­ficos no componente.
-  ForÃ§amos a cor final apenas no tema escuro.
+  O texto do mÃƒÂªs possui estilos mais especÃƒÂ­ficos no componente.
+  ForÃƒÂ§amos a cor final apenas no tema escuro.
 */
 
 :root[data-theme-mode='escuro'] .mes-atual,
@@ -3934,7 +3934,7 @@ body {
 }
 
 /* ================================= */
-/* MOBILE V3 — NAVEGAÇÃO E LARGURA   */
+/* MOBILE V3 â€” NAVEGAÃ‡ÃƒO E LARGURA   */
 /* ================================= */
 
 html,
@@ -4353,4 +4353,34 @@ body {
   :root[data-theme-mode='sistema'] .conta-seguranca {
     border-top-color: #40383c;
   }
+}
+
+
+
+
+/* MOVIMENTAÃ‡ÃƒO DE INVESTIMENTO CLICÃVEL */
+
+.item-aporte-clicavel {
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.item-aporte-clicavel:hover {
+  background: var(--accent-soft);
+}
+
+.item-aporte-clicavel:active {
+  transform: scale(0.995);
+}
+
+.item-aporte-clicavel:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.item-aporte-clicavel .btn-excluir {
+  cursor: pointer;
 }
