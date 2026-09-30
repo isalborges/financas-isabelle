@@ -26,6 +26,9 @@ type LancamentosProps = {
 
   lancamentos: Lancamento[];
 
+  userId:
+    string;
+
   configuracoes:
     ConfiguracoesFinanceiras;
 
@@ -87,6 +90,8 @@ function Lancamentos({
 
   lancamentos,
 
+  userId,
+
   configuracoes,
 
   mesSelecionado,
@@ -108,6 +113,9 @@ function Lancamentos({
   limparLancamentoParaEditar
 
 }: LancamentosProps) {
+
+  const chaveRascunhoLancamento =
+    `controle-financeiro-rascunho-lancamento-${userId}`;
 
   const [
 
@@ -981,6 +989,10 @@ function Lancamentos({
 
   function limparFormulario() {
 
+    localStorage.removeItem(
+      chaveRascunhoLancamento
+    );
+
     setData('');
 
     setDescricao('');
@@ -1059,6 +1071,10 @@ function Lancamentos({
     lancamento: Lancamento
 
   ) => {
+
+    localStorage.removeItem(
+      chaveRascunhoLancamento
+    );
 
     setErros({});
 
@@ -1258,7 +1274,9 @@ function Lancamentos({
 
     );
 
-  }, []);
+  }, [
+    chaveRascunhoLancamento
+  ]);
 
   useEffect(() => {
 
@@ -1316,6 +1334,205 @@ function Lancamentos({
     abrirEdicao,
     limparLancamentoParaEditar
   ]);
+
+  useEffect(
+    () => {
+      if (
+        lancamentoParaEditar !==
+        null
+      ) {
+        return;
+      }
+
+      const rascunho =
+        localStorage.getItem(
+          chaveRascunhoLancamento
+        );
+
+      if (
+        !rascunho
+      ) {
+        return;
+      }
+
+      try {
+        const dados =
+          JSON.parse(
+            rascunho
+          ) as {
+            aberto?: boolean;
+            lancamentoEditandoId?: number | null;
+            data?: string;
+            descricao?: string;
+            valor?: string;
+            categoria?: string;
+            tipo?: 'Entrada' | 'Saída';
+            formaPagamento?: FormaPagamento;
+            tipoLancamento?: 'unico' | 'recorrente' | 'parcelado';
+            dataInicio?: string;
+            dataFim?: string;
+            valorTotal?: string;
+            quantidadeParcelas?: string;
+            parcelaAtual?: string;
+            primeiraParcela?: string;
+          };
+
+        if (
+          !dados.aberto
+        ) {
+          return;
+        }
+
+        const editando =
+          dados.lancamentoEditandoId
+            ? lancamentos.find(
+                (
+                  lancamento
+                ) =>
+                  lancamento.id ===
+                  dados.lancamentoEditandoId
+              ) ?? null
+            : null;
+
+        setLancamentoEditando(
+          editando
+        );
+
+        setData(
+          dados.data ??
+            ''
+        );
+
+        setDescricao(
+          dados.descricao ??
+            ''
+        );
+
+        setValor(
+          dados.valor ??
+            ''
+        );
+
+        setCategoria(
+          dados.categoria ??
+            configuracoes.categorias[0] ??
+            'Alimentação'
+        );
+
+        setTipo(
+          dados.tipo ??
+            'Saída'
+        );
+
+        setFormaPagamento(
+          dados.formaPagamento ??
+            'PIX'
+        );
+
+        setTipoLancamento(
+          dados.tipoLancamento ??
+            'unico'
+        );
+
+        setDataInicio(
+          dados.dataInicio ??
+            ''
+        );
+
+        setDataFim(
+          dados.dataFim ??
+            ''
+        );
+
+        setValorTotal(
+          dados.valorTotal ??
+            ''
+        );
+
+        setQuantidadeParcelas(
+          dados.quantidadeParcelas ??
+            ''
+        );
+
+        setParcelaAtual(
+          dados.parcelaAtual ??
+            '1'
+        );
+
+        setPrimeiraParcela(
+          dados.primeiraParcela ??
+            ''
+        );
+
+        setMostrarFormulario(
+          true
+        );
+      }
+      catch {
+        localStorage.removeItem(
+          chaveRascunhoLancamento
+        );
+      }
+    },
+    [
+      chaveRascunhoLancamento,
+      configuracoes.categorias,
+      lancamentos,
+      lancamentoParaEditar
+    ]
+  );
+
+  useEffect(
+    () => {
+      if (
+        !mostrarFormulario
+      ) {
+        return;
+      }
+
+      localStorage.setItem(
+        chaveRascunhoLancamento,
+        JSON.stringify({
+          aberto:
+            true,
+          lancamentoEditandoId:
+            lancamentoEditando?.id ??
+            null,
+          data,
+          descricao,
+          valor,
+          categoria,
+          tipo,
+          formaPagamento,
+          tipoLancamento,
+          dataInicio,
+          dataFim,
+          valorTotal,
+          quantidadeParcelas,
+          parcelaAtual,
+          primeiraParcela
+        })
+      );
+    },
+    [
+      mostrarFormulario,
+      lancamentoEditando,
+      data,
+      descricao,
+      valor,
+      categoria,
+      tipo,
+      formaPagamento,
+      tipoLancamento,
+      dataInicio,
+      dataFim,
+      valorTotal,
+      quantidadeParcelas,
+      parcelaAtual,
+      primeiraParcela,
+      chaveRascunhoLancamento
+    ]
+  );
 
   function validarFormulario() {
 

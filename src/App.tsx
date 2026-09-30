@@ -2307,6 +2307,80 @@ function App() {
 
 
 
+  async function editarMovimentacaoInvestimento(
+    movimentacaoAtualizada:
+      MovimentacaoInvestimento
+  ) {
+    if (
+      !session
+    ) {
+      return false;
+    }
+
+    const {
+      id,
+      ...dadosMovimentacao
+    } =
+      movimentacaoAtualizada;
+
+    const {
+      data,
+      error
+    } =
+      await supabase
+        .from(
+          'investimentos_movimentacoes'
+        )
+        .update(
+          converterMovimentacaoParaBanco(
+            dadosMovimentacao,
+            session.user.id
+          )
+        )
+        .eq(
+          'id',
+          id
+        )
+        .select(
+          '*'
+        )
+        .single();
+
+    if (
+      error
+    ) {
+      window.alert(
+        `Não foi possível atualizar a movimentação: ${error.message}`
+      );
+
+      return false;
+    }
+
+    const movimentacaoSalva =
+      converterMovimentacaoDoBanco(
+        data as MovimentacaoInvestimentoBanco
+      );
+
+    setMovimentacoesInvestimento(
+      (
+        movimentacoesAtuais
+      ) =>
+        movimentacoesAtuais.map(
+          (
+            movimentacao
+          ) =>
+            movimentacao.id ===
+              movimentacaoSalva.id
+              ? movimentacaoSalva
+              : movimentacao
+        )
+    );
+
+    return true;
+  }
+
+
+
   async function excluirMovimentacaoInvestimento(
 
     id:
@@ -4117,6 +4191,14 @@ function App() {
 
 
 
+              userId={
+
+                session.user.id
+
+              }
+
+
+
               configuracoes={
 
                 configuracoesFinanceiras
@@ -4297,9 +4379,25 @@ function App() {
 
 
 
+              userId={
+
+                session.user.id
+
+              }
+
+
+
               adicionarMovimentacao={
 
                 adicionarMovimentacaoInvestimento
+
+              }
+
+
+
+              editarMovimentacao={
+
+                editarMovimentacaoInvestimento
 
               }
 
