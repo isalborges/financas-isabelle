@@ -32,6 +32,21 @@ type ConfirmacaoPendente = {
   ) => void;
 };
 
+type ConfirmacaoTresOpcoes = {
+  titulo?: string;
+  mensagem: string;
+  textoConfirmar?: string;
+  textoCancelar?: string;
+  textoAlternativo?: string;
+  perigoso?: boolean;
+  resolver: (
+    escolha:
+      | 'cancelar'
+      | 'salvar'
+      | 'sair'
+  ) => void;
+};
+
 function tituloPadrao(
   tipo: TipoNotificacao
 ) {
@@ -100,6 +115,14 @@ function FeedbackGlobal() {
   ] =
     useState<
       ConfirmacaoPendente | null
+    >(null);
+
+  const [
+    confirmacaoTresOpcoes,
+    setConfirmacaoTresOpcoes
+  ] =
+    useState<
+      ConfirmacaoTresOpcoes | null
     >(null);
 
   const proximoId =
@@ -173,6 +196,21 @@ function FeedbackGlobal() {
         );
       }
 
+      function tratarConfirmacaoTresOpcoes(
+        evento: Event
+      ) {
+        const detalhe =
+          (
+            evento as CustomEvent<
+              ConfirmacaoTresOpcoes
+            >
+          ).detail;
+
+        setConfirmacaoTresOpcoes(
+          detalhe
+        );
+      }
+
       const alertaOriginal =
         window.alert;
 
@@ -202,6 +240,11 @@ function FeedbackGlobal() {
         tratarConfirmacao
       );
 
+      window.addEventListener(
+        'controle-financeiro:confirmacao-tres-opcoes',
+        tratarConfirmacaoTresOpcoes
+      );
+
       return () => {
         window.alert =
           alertaOriginal;
@@ -214,6 +257,11 @@ function FeedbackGlobal() {
         window.removeEventListener(
           'controle-financeiro:confirmacao',
           tratarConfirmacao
+        );
+
+        window.removeEventListener(
+          'controle-financeiro:confirmacao-tres-opcoes',
+          tratarConfirmacaoTresOpcoes
         );
       };
     },
@@ -250,6 +298,27 @@ function FeedbackGlobal() {
     );
 
     setConfirmacao(
+      null
+    );
+  }
+
+  function responderConfirmacaoTresOpcoes(
+    escolha:
+      | 'cancelar'
+      | 'salvar'
+      | 'sair'
+  ) {
+    if (
+      !confirmacaoTresOpcoes
+    ) {
+      return;
+    }
+
+    confirmacaoTresOpcoes.resolver(
+      escolha
+    );
+
+    setConfirmacaoTresOpcoes(
       null
     );
   }
@@ -389,6 +458,96 @@ function FeedbackGlobal() {
           </div>
         </div>
       )}
+
+      {confirmacaoTresOpcoes && (
+        <div
+          className="feedback-confirmacao-backdrop"
+          onMouseDown={() =>
+            responderConfirmacaoTresOpcoes(
+              'cancelar'
+            )
+          }
+        >
+          <div
+            className="feedback-confirmacao"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="feedback-confirmacao-tres-titulo"
+            onMouseDown={(
+              evento
+            ) =>
+              evento.stopPropagation()
+            }
+          >
+            <div className="feedback-confirmacao-icone">
+              ?
+            </div>
+
+            <div className="feedback-confirmacao-conteudo">
+              <h3
+                id="feedback-confirmacao-tres-titulo"
+              >
+                {confirmacaoTresOpcoes.titulo ??
+                  'Confirmar ação'
+                }
+              </h3>
+
+              <p>
+                {confirmacaoTresOpcoes.mensagem}
+              </p>
+            </div>
+
+            <div className="feedback-confirmacao-acoes feedback-confirmacao-acoes-tres">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() =>
+                  responderConfirmacaoTresOpcoes(
+                    'cancelar'
+                  )
+                }
+              >
+                {confirmacaoTresOpcoes.textoCancelar ??
+                  'Cancelar'
+                }
+              </button>
+
+              <button
+                type="button"
+                className="feedback-btn-salvar"
+                onClick={() =>
+                  responderConfirmacaoTresOpcoes(
+                    'salvar'
+                  )
+                }
+              >
+                {confirmacaoTresOpcoes.textoAlternativo ??
+                  'Salvar e sair'
+                }
+              </button>
+
+              <button
+                type="button"
+                className={
+                  confirmacaoTresOpcoes.perigoso
+                    ? 'feedback-btn-perigo'
+                    : 'btn-primary'
+                }
+                onClick={() =>
+                  responderConfirmacaoTresOpcoes(
+                    'sair'
+                  )
+                }
+              >
+                {confirmacaoTresOpcoes.textoConfirmar ??
+                  'Sair sem salvar'
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </>
   );
 }

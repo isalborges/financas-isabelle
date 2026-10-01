@@ -50,3 +50,38 @@ export function confirmarAcao(
     }
   );
 }
+
+
+export type EscolhaSaidaConfiguracoes =
+  | 'cancelar'
+  | 'salvar'
+  | 'sair';
+
+export function escolherSaidaConfiguracoes(): Promise<EscolhaSaidaConfiguracoes> {
+  return new Promise(
+    (resolver) => {
+      window.dispatchEvent(
+        new CustomEvent(
+          'controle-financeiro:confirmacao-tres-opcoes',
+          {
+            detail: {
+              titulo:
+                'Sair sem salvar?',
+              mensagem:
+                'Você fez alterações nas Configurações e ainda não salvou. O que deseja fazer?',
+              textoCancelar:
+                'Cancelar',
+              textoAlternativo:
+                'Salvar e sair',
+              textoConfirmar:
+                'Sair sem salvar',
+              perigoso:
+                true,
+              resolver
+            }
+          }
+        )
+      );
+    }
+  );
+}

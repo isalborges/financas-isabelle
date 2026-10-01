@@ -6,6 +6,8 @@ import {
 
   useEffect,
 
+  useRef,
+
   useState
 
 } from 'react';
@@ -30,7 +32,9 @@ import {
 
 import {
 
-  confirmarAcao
+  confirmarAcao,
+
+  escolherSaidaConfiguracoes
 
 } from './lib/feedback';
 
@@ -75,6 +79,14 @@ import Relatorios
 import Configuracoes
 
   from './components/Configuracoes/Configuracoes';
+
+
+
+import type {
+
+  ConfiguracoesHandle
+
+} from './components/Configuracoes/Configuracoes';
 
 
 
@@ -637,6 +649,13 @@ function converterMovimentacaoParaBanco(
 
 
 function App() {
+
+  const configuracoesRef =
+    useRef<
+      ConfiguracoesHandle | null
+    >(null);
+
+
 
 
 
@@ -3533,21 +3552,42 @@ function App() {
 
 
 
-    return await confirmarAcao({
+    const escolha =
+      await escolherSaidaConfiguracoes();
 
-      titulo:
-        'Sair sem salvar?',
 
-      mensagem:
-        'Você fez alterações nas Configurações e ainda não salvou. Se sair agora, essas alterações serão descartadas.',
 
-      textoConfirmar:
-        'Sair sem salvar',
+    if (
 
-      perigoso:
-        true
+      escolha === 'cancelar'
 
-    });
+    ) {
+
+      return false;
+
+    }
+
+
+
+    if (
+
+      escolha === 'sair'
+
+    ) {
+
+      return true;
+
+    }
+
+
+
+    const salvou =
+      await configuracoesRef.current
+        ?.salvar();
+
+
+
+    return salvou === true;
 
   }
 
@@ -4503,6 +4543,14 @@ function App() {
 
 
             <Configuracoes
+
+              ref={
+
+                configuracoesRef
+
+              }
+
+
 
               onAlteracoesPendentes={
 

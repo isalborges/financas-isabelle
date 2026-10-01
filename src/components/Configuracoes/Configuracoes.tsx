@@ -1,4 +1,9 @@
-import { useEffect, useState } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState
+} from 'react';
 
 import {
   criarIdCaixinha
@@ -24,6 +29,10 @@ type PerfilUsuario = {
   avatar_url: string | null;
   tema_cor: string | null;
   modo_tema: string | null;
+};
+
+export type ConfiguracoesHandle = {
+  salvar: () => Promise<boolean>;
 };
 
 type ConfiguracoesProps = {
@@ -124,7 +133,10 @@ const FORMAS_PAGAMENTO_OBRIGATORIAS = [
   'Débito'
 ];
 
-function Configuracoes({
+const Configuracoes = forwardRef<
+  ConfiguracoesHandle,
+  ConfiguracoesProps
+>(function Configuracoes({
   onAlteracoesPendentes,
   configuracoesSalvas,
   onSalvarConfiguracoes,
@@ -138,7 +150,7 @@ function Configuracoes({
   temaCor,
   modoTema,
   onPerfilAtualizado
-}: ConfiguracoesProps) {
+}: ConfiguracoesProps, ref) {
   const [
     configuracoes,
     setConfiguracoes
@@ -528,7 +540,7 @@ function Configuracoes({
         );
 
         setSalvando(false);
-        return;
+        return false;
       }
 
       const caminho =
@@ -558,7 +570,7 @@ function Configuracoes({
         );
 
         setSalvando(false);
-        return;
+        return false;
       }
 
       const {
@@ -606,7 +618,7 @@ function Configuracoes({
       );
 
       setSalvando(false);
-      return;
+      return false;
     }
 
     const configuracoesSalvasComSucesso =
@@ -618,7 +630,7 @@ function Configuracoes({
       !configuracoesSalvasComSucesso
     ) {
       setSalvando(false);
-      return;
+      return false;
     }
 
     setSnapshotConfiguracoes(
@@ -663,7 +675,16 @@ function Configuracoes({
     window.setTimeout(() => {
       setMensagem('');
     }, 2500);
+
+    return true;
   }
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      salvar
+    })
+  );
 
   function adicionarCategoria() {
     const nome =
@@ -1740,6 +1761,6 @@ function Configuracoes({
       </div>
     </section>
   );
-}
+});
 
 export default Configuracoes;
