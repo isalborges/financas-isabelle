@@ -12,6 +12,10 @@ import {
   supabase
 } from '../../lib/supabase';
 
+import {
+  confirmarAcao
+} from '../../lib/feedback';
+
 import './Configuracoes.css';
 
 type PerfilUsuario = {
@@ -868,7 +872,7 @@ function Configuracoes({
     setNovaCaixinha('');
   }
 
-  function excluirCaixinha(
+  async function excluirCaixinha(
     id: string
   ) {
     const caixinha =
@@ -890,9 +894,16 @@ function Configuracoes({
     }
 
     const confirmar =
-      window.confirm(
-        `Excluir a caixinha "${caixinha.nome}"?`
-      );
+      await confirmarAcao({
+        titulo:
+          'Excluir caixinha?',
+        mensagem:
+          `A caixinha "${caixinha.nome}" será removida das suas configurações.`,
+        textoConfirmar:
+          'Excluir',
+        perigoso:
+          true
+      });
 
     if (!confirmar) {
       return;
@@ -910,6 +921,22 @@ function Configuracoes({
 
   return (
     <section className="page">
+      <div className="config-aviso-importante">
+        <div className="config-aviso-importante-icone">
+          !
+        </div>
+
+        <div>
+          <strong>
+            Importante
+          </strong>
+
+          <p>
+            As alterações feitas nesta página só entram em vigor depois que você clicar em “Salvar configurações” no final da página.
+          </p>
+        </div>
+      </div>
+
       {mensagem && (
         <div className="config-sucesso-popup">
           <span className="config-sucesso-icone">

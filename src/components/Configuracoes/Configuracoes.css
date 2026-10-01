@@ -325,3 +325,56 @@
     width: 100%;
   }
 }
+
+
+/* AVISO IMPORTANTE NO TOPO DAS CONFIGURAÇÕES */
+
+.config-aviso-importante {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 13px;
+  align-items: start;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border));
+  border-radius: 16px;
+  background: var(--accent-soft);
+}
+
+.config-aviso-importante-icone {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--card-bg);
+  color: var(--accent);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.config-aviso-importante strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.config-aviso-importante p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .config-aviso-importante {
+    grid-template-columns: 36px 1fr;
+    padding: 14px;
+  }
+
+  .config-aviso-importante-icone {
+    width: 34px;
+    height: 34px;
+  }
+}

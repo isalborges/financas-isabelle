@@ -28,6 +28,14 @@ import {
 
 
 
+import {
+
+  confirmarAcao
+
+} from './lib/feedback';
+
+
+
 import Auth
 
   from './components/Auth/Auth';
@@ -1326,11 +1334,18 @@ function App() {
 
             const importar =
 
-              window.confirm(
+              await confirmarAcao({
 
-                `Encontramos ${lancamentosLocais.length} lançamento(s) antigos salvos somente neste navegador. Deseja importá-los para esta conta do Supabase?\n\nFaça isso apenas se estes dados forem seus.`
+                titulo:
+                  'Importar lançamentos antigos?',
 
-              );
+                mensagem:
+                  `Encontramos ${lancamentosLocais.length} lançamento(s) antigos salvos somente neste navegador.\n\nImporte apenas se estes dados forem seus.`,
+
+                textoConfirmar:
+                  'Importar'
+
+              });
 
 
 
@@ -1953,11 +1968,18 @@ function App() {
 
             const importar =
 
-              window.confirm(
+              await confirmarAcao({
 
-                `Encontramos ${movimentacoesLocais.length} movimentação(ões) de investimento salva(s) somente neste navegador. Deseja importá-las para esta conta do Supabase?\n\nFaça isso apenas se estes dados forem seus.`
+                titulo:
+                  'Importar investimentos antigos?',
 
-              );
+                mensagem:
+                  `Encontramos ${movimentacoesLocais.length} movimentação(ões) de investimento salva(s) somente neste navegador.\n\nImporte apenas se estes dados forem seus.`,
+
+                textoConfirmar:
+                  'Importar'
+
+              });
 
 
 
@@ -2724,11 +2746,18 @@ function App() {
 
               importarDadosLocais =
 
-                window.confirm(
+                await confirmarAcao({
 
-                  'Encontramos categorias e caixinhas antigas salvas somente neste navegador. Deseja importá-las para esta conta do Supabase?\n\nFaça isso apenas se estas configurações forem suas.'
+                  titulo:
+                    'Importar configurações antigas?',
 
-                );
+                  mensagem:
+                    'Encontramos categorias e caixinhas antigas salvas somente neste navegador.\n\nImporte apenas se estas configurações forem suas.',
+
+                  textoConfirmar:
+                    'Importar'
+
+                });
 
 
 
@@ -3488,7 +3517,7 @@ function App() {
 
 
 
-  function confirmarSaidaConfiguracoes() {
+  async function confirmarSaidaConfiguracoes() {
 
     if (
 
@@ -3504,17 +3533,27 @@ function App() {
 
 
 
-    return window.confirm(
+    return await confirmarAcao({
 
-      'Você fez alterações nas Configurações e ainda não salvou. Deseja sair sem salvar?'
+      titulo:
+        'Sair sem salvar?',
 
-    );
+      mensagem:
+        'Você fez alterações nas Configurações e ainda não salvou. Se sair agora, essas alterações serão descartadas.',
+
+      textoConfirmar:
+        'Sair sem salvar',
+
+      perigoso:
+        true
+
+    });
 
   }
 
 
 
-  function mudarPaginaComConfirmacao(
+  async function mudarPaginaComConfirmacao(
 
     novaPagina: string
 
@@ -3534,7 +3573,7 @@ function App() {
 
     if (
 
-      !confirmarSaidaConfiguracoes()
+      !(await confirmarSaidaConfiguracoes())
 
     ) {
 
@@ -3550,7 +3589,7 @@ function App() {
 
 
 
-  function abrirSecaoLancamentos(
+  async function abrirSecaoLancamentos(
 
     secao:
 
@@ -3566,7 +3605,7 @@ function App() {
 
     if (
 
-      !confirmarSaidaConfiguracoes()
+      !(await confirmarSaidaConfiguracoes())
 
     ) {
 
@@ -3600,7 +3639,7 @@ function App() {
 
 
 
-  function abrirConfiguracao(
+  async function abrirConfiguracao(
 
     secao:
 
@@ -3624,7 +3663,7 @@ function App() {
 
       if (
 
-        !confirmarSaidaConfiguracoes()
+        !(await confirmarSaidaConfiguracoes())
 
       ) {
 
@@ -3660,7 +3699,7 @@ function App() {
 
 
 
-  function abrirCaixinhaInvestimento(
+  async function abrirCaixinhaInvestimento(
 
     id: string
 
@@ -3668,7 +3707,7 @@ function App() {
 
     if (
 
-      !confirmarSaidaConfiguracoes()
+      !(await confirmarSaidaConfiguracoes())
 
     ) {
 
