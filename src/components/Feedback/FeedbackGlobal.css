@@ -16,10 +16,11 @@
   gap: 12px;
   align-items: start;
   padding: 15px 14px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-main);
   border-radius: 16px;
-  background: var(--card-bg);
-  box-shadow: 0 16px 44px rgba(26, 20, 23, 0.16);
+  background: var(--surface);
+  color: var(--text-main);
+  box-shadow: 0 16px 44px rgba(26, 20, 23, 0.18);
   pointer-events: auto;
   animation: feedback-entrada 0.22s ease;
 }
@@ -53,13 +54,13 @@
 .feedback-toast-conteudo strong {
   display: block;
   margin-bottom: 3px;
-  color: var(--text);
+  color: var(--text-main);
   font-size: 14px;
 }
 
 .feedback-toast-conteudo p {
   margin: 0;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 13px;
   line-height: 1.45;
 }
@@ -81,17 +82,21 @@
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(20, 17, 19, 0.38);
-  backdrop-filter: blur(3px);
+  background: rgba(20, 17, 19, 0.54);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .feedback-confirmacao {
   width: min(440px, 100%);
   padding: 24px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-main);
   border-radius: 20px;
-  background: var(--card-bg);
-  box-shadow: 0 24px 70px rgba(20, 17, 19, 0.22);
+  background: var(--surface);
+  color: var(--text-main);
+  box-shadow:
+    0 24px 70px rgba(20, 17, 19, 0.28),
+    0 2px 10px rgba(20, 17, 19, 0.08);
 }
 
 .feedback-confirmacao-icone {
@@ -109,13 +114,13 @@
 
 .feedback-confirmacao-conteudo h3 {
   margin: 0 0 8px;
-  color: var(--text);
+  color: var(--text-main);
   font-size: 18px;
 }
 
 .feedback-confirmacao-conteudo p {
   margin: 0;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   line-height: 1.55;
   white-space: pre-line;
 }
@@ -127,6 +132,12 @@
   margin-top: 22px;
 }
 
+.feedback-confirmacao-acoes .btn-secondary {
+  border: 1px solid var(--border-main);
+  background: var(--surface-soft);
+  color: var(--text-main);
+}
+
 .feedback-btn-perigo {
   border: 0;
   border-radius: 12px;
@@ -135,6 +146,10 @@
   color: #fff;
   font-weight: 700;
   cursor: pointer;
+}
+
+.feedback-btn-perigo:hover {
+  background: #b94141;
 }
 
 @keyframes feedback-entrada {
@@ -157,8 +172,15 @@
     width: auto;
   }
 
+  .feedback-confirmacao-backdrop {
+    align-items: end;
+    padding: 16px;
+  }
+
   .feedback-confirmacao {
+    width: 100%;
     padding: 20px;
+    border-radius: 20px;
   }
 
   .feedback-confirmacao-acoes {

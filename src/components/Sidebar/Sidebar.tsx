@@ -84,6 +84,38 @@ function Sidebar({
     setMenuMobileAberto(false);
   }
 
+  function clicarGrupoPrincipal(
+    grupo:
+      | 'lancamentos'
+      | 'investimentos'
+      | 'configuracoes',
+    pagina:
+      | 'lancamentos'
+      | 'investimentos'
+      | 'configuracoes'
+  ) {
+    const desktop =
+      window.innerWidth > 768;
+
+    if (
+      desktop
+    ) {
+      setGrupoAberto(
+        grupo
+      );
+
+      void mudarPagina(
+        pagina
+      );
+
+      return;
+    }
+
+    alternarGrupo(
+      grupo
+    );
+  }
+
   const emojis: Record<
     string,
     string
@@ -177,7 +209,8 @@ function Sidebar({
                 : ''
             }
             onClick={() =>
-              alternarGrupo(
+              clicarGrupoPrincipal(
+                'lancamentos',
                 'lancamentos'
               )
             }
@@ -262,7 +295,8 @@ function Sidebar({
                 : ''
             }
             onClick={() =>
-              alternarGrupo(
+              clicarGrupoPrincipal(
+                'investimentos',
                 'investimentos'
               )
             }
@@ -310,7 +344,8 @@ function Sidebar({
                 : ''
             }
             onClick={() =>
-              alternarGrupo(
+              clicarGrupoPrincipal(
+                'configuracoes',
                 'configuracoes'
               )
             }
