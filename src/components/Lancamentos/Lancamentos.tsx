@@ -22,6 +22,11 @@ import type {
 
 import SeletorMes from '../SeletorMes/SeletorMes';
 
+import {
+  confirmarAcao,
+  notificar
+} from '../../lib/feedback';
+
 type LancamentosProps = {
 
   lancamentos: Lancamento[];
@@ -44,15 +49,15 @@ type LancamentosProps = {
 
   adicionarLancamento:
 
-    (lancamento: Lancamento) => void;
+    (lancamento: Lancamento) => Promise<boolean>;
 
   editarLancamento:
 
-    (lancamento: Lancamento) => void;
+    (lancamento: Lancamento) => Promise<boolean>;
 
   excluirLancamento:
 
-    (id: number) => void;
+    (id: number) => Promise<boolean>;
 
   lancamentoParaEditar:
 
@@ -140,6 +145,26 @@ function Lancamentos({
       null
 
     );
+
+  const [
+
+    salvandoLancamento,
+
+    setSalvandoLancamento
+
+  ] =
+
+    useState(false);
+
+  const [
+
+    excluindoLancamentoId,
+
+    setExcluindoLancamentoId
+
+  ] =
+
+    useState<number | null>(null);
 
   const [
 
@@ -1786,10 +1811,11 @@ function Lancamentos({
 
   }
 
-  function salvarLancamento() {
+  async function salvarLancamento() {
 
     if (
 
+      salvandoLancamento ||
       !validarFormulario()
 
     ) {
@@ -1798,358 +1824,182 @@ function Lancamentos({
 
     }
 
-    if (
+    setSalvandoLancamento(
+      true
+    );
 
-      tipoLancamento ===
-
-      'unico'
-
-    ) {
-
-      const novoLancamento:
-
-        Lancamento = {
-
-        id:
-
-          lancamentoEditando
-
-            ? lancamentoEditando.id
-
-            : Date.now(),
-
-        data:
-
-          new Date(
-
-            `${data}T12:00:00`
-
-          ).toLocaleDateString(
-
-            'pt-BR'
-
-          ),
-
-        descricao,
-
-        categoria,
-
-        tipo,
-
-        formaPagamento:
-
-          tipo === 'Saída'
-
-            ? formaPagamento
-
-            : undefined,
-
-        pagamentosPorMes:
-
-          lancamentoEditando
-
-            ?.pagamentosPorMes,
-
-        valor:
-
-          Number(valor),
-
-        recorrente:
-
-          false,
-
-        parcelado:
-
-          false
-
-      };
+    try {
+      let novoLancamento:
+        Lancamento;
 
       if (
-
-        lancamentoEditando
-
+        tipoLancamento ===
+        'unico'
       ) {
-
-        editarLancamento(
-
-          novoLancamento
-
-        );
-
+        novoLancamento = {
+          id:
+            lancamentoEditando
+              ? lancamentoEditando.id
+              : Date.now(),
+          data:
+            new Date(
+              `${data}T12:00:00`
+            ).toLocaleDateString(
+              'pt-BR'
+            ),
+          descricao,
+          categoria,
+          tipo,
+          formaPagamento:
+            tipo === 'Saída'
+              ? formaPagamento
+              : undefined,
+          pagamentosPorMes:
+            lancamentoEditando
+              ?.pagamentosPorMes,
+          valor:
+            Number(valor),
+          recorrente:
+            false,
+          parcelado:
+            false
+        };
       }
-
+      else if (
+        tipoLancamento ===
+        'recorrente'
+      ) {
+        novoLancamento = {
+          id:
+            lancamentoEditando
+              ? lancamentoEditando.id
+              : Date.now(),
+          data:
+            new Date(
+              `${dataInicio}T12:00:00`
+            ).toLocaleDateString(
+              'pt-BR'
+            ),
+          descricao,
+          categoria,
+          tipo,
+          formaPagamento:
+            tipo === 'Saída'
+              ? formaPagamento
+              : undefined,
+          pagamentosPorMes:
+            lancamentoEditando
+              ?.pagamentosPorMes,
+          valor:
+            Number(valor),
+          recorrente:
+            true,
+          parcelado:
+            false,
+          frequencia:
+            'mensal',
+          dataInicio,
+          dataFim:
+            dataFim ||
+            undefined
+        };
+      }
       else {
+        const total =
+          Number(
+            valorTotal
+          );
 
-        adicionarLancamento(
+        const quantidade =
+          Number(
+            quantidadeParcelas
+          );
 
-          novoLancamento
+        const atual =
+          Number(
+            parcelaAtual
+          );
 
+        const valorParcela =
+          Number(
+            (
+              total /
+              quantidade
+            ).toFixed(
+              2
+            )
+          );
+
+        novoLancamento = {
+          id:
+            lancamentoEditando
+              ? lancamentoEditando.id
+              : Date.now(),
+          data:
+            new Date(
+              `${primeiraParcela}T12:00:00`
+            ).toLocaleDateString(
+              'pt-BR'
+            ),
+          descricao,
+          categoria,
+          tipo,
+          formaPagamento:
+            tipo === 'Saída'
+              ? formaPagamento
+              : undefined,
+          pagamentosPorMes:
+            lancamentoEditando
+              ?.pagamentosPorMes,
+          valor:
+            valorParcela,
+          parcelado:
+            true,
+          recorrente:
+            false,
+          valorTotal:
+            total,
+          quantidadeParcelas:
+            quantidade,
+          parcelaAtual:
+            atual,
+          primeiraParcela
+        };
+      }
+
+      const estavaEditando =
+        Boolean(
+          lancamentoEditando
         );
 
+      const sucesso =
+        lancamentoEditando
+          ? await editarLancamento(
+              novoLancamento
+            )
+          : await adicionarLancamento(
+              novoLancamento
+            );
+
+      if (
+        !sucesso
+      ) {
+        return;
       }
+
+      notificar(
+        estavaEditando
+          ? 'Lançamento atualizado com sucesso.'
+          : 'Lançamento adicionado com sucesso.',
+        'sucesso'
+      );
 
       limparFormulario();
-
-      return;
-
     }
-
-    if (
-
-      tipoLancamento ===
-
-      'recorrente'
-
-    ) {
-
-      const novoLancamento:
-
-        Lancamento = {
-
-        id:
-
-          lancamentoEditando
-
-            ? lancamentoEditando.id
-
-            : Date.now(),
-
-        data:
-
-          new Date(
-
-            `${dataInicio}T12:00:00`
-
-          ).toLocaleDateString(
-
-            'pt-BR'
-
-          ),
-
-        descricao,
-
-        categoria,
-
-        tipo,
-
-        formaPagamento:
-
-          tipo === 'Saída'
-
-            ? formaPagamento
-
-            : undefined,
-
-        pagamentosPorMes:
-
-          lancamentoEditando
-
-            ?.pagamentosPorMes,
-
-        valor:
-
-          Number(valor),
-
-        recorrente:
-
-          true,
-
-        parcelado:
-
-          false,
-
-        frequencia:
-
-          'mensal',
-
-        dataInicio,
-
-        dataFim:
-
-          dataFim ||
-
-          undefined
-
-      };
-
-      if (
-
-        lancamentoEditando
-
-      ) {
-
-        editarLancamento(
-
-          novoLancamento
-
-        );
-
-      }
-
-      else {
-
-        adicionarLancamento(
-
-          novoLancamento
-
-        );
-
-      }
-
-      limparFormulario();
-
-      return;
-
-    }
-
-    if (
-
-      tipoLancamento ===
-
-      'parcelado'
-
-    ) {
-
-      const total =
-
-        Number(
-
-          valorTotal
-
-        );
-
-      const quantidade =
-
-        Number(
-
-          quantidadeParcelas
-
-        );
-
-      const atual =
-
-        Number(
-
-          parcelaAtual
-
-        );
-
-      const valorParcela =
-
-        Number(
-
-          (
-
-            total /
-
-            quantidade
-
-          ).toFixed(
-
-            2
-
-          )
-
-        );
-
-      const novoLancamento:
-
-        Lancamento = {
-
-        id:
-
-          lancamentoEditando
-
-            ? lancamentoEditando.id
-
-            : Date.now(),
-
-        data:
-
-          new Date(
-
-            `${primeiraParcela}T12:00:00`
-
-          ).toLocaleDateString(
-
-            'pt-BR'
-
-          ),
-
-        descricao,
-
-        categoria,
-
-        tipo,
-
-        formaPagamento:
-
-          tipo === 'Saída'
-
-            ? formaPagamento
-
-            : undefined,
-
-        pagamentosPorMes:
-
-          lancamentoEditando
-
-            ?.pagamentosPorMes,
-
-        valor:
-
-          valorParcela,
-
-        parcelado:
-
-          true,
-
-        recorrente:
-
-          false,
-
-        valorTotal:
-
-          total,
-
-        quantidadeParcelas:
-
-          quantidade,
-
-        parcelaAtual:
-
-          atual,
-
-        primeiraParcela
-
-      };
-
-      if (
-
-        lancamentoEditando
-
-      ) {
-
-        editarLancamento(
-
-          novoLancamento
-
-        );
-
-      }
-
-      else {
-
-        adicionarLancamento(
-
-          novoLancamento
-
-        );
-
-      }
-
-      limparFormulario();
-
+    finally {
+      setSalvandoLancamento(
+        false
+      );
     }
 
   }
@@ -2240,19 +2090,30 @@ function Lancamentos({
 
   }
 
-  function removerLancamento(
+  async function removerLancamento(
 
     id: number
 
   ) {
 
+    if (
+      excluindoLancamentoId !==
+      null
+    ) {
+      return;
+    }
+
     const confirmar =
-
-      window.confirm(
-
-        'Deseja realmente excluir este lançamento?'
-
-      );
+      await confirmarAcao({
+        titulo:
+          'Excluir lançamento?',
+        mensagem:
+          'Esse lançamento será removido das suas finanças.',
+        textoConfirmar:
+          'Excluir',
+        perigoso:
+          true
+      });
 
     if (
 
@@ -2264,11 +2125,30 @@ function Lancamentos({
 
     }
 
-    excluirLancamento(
-
+    setExcluindoLancamentoId(
       id
-
     );
+
+    try {
+      const sucesso =
+        await excluirLancamento(
+          id
+        );
+
+      if (
+        sucesso
+      ) {
+        notificar(
+          'Lançamento excluído com sucesso.',
+          'sucesso'
+        );
+      }
+    }
+    finally {
+      setExcluindoLancamentoId(
+        null
+      );
+    }
 
   }
 
@@ -2612,9 +2492,18 @@ function Lancamentos({
 
             title="Excluir lançamento"
 
+            disabled={
+              excluindoLancamentoId ===
+              lancamento.id
+            }
+
           >
 
-            ×
+            {excluindoLancamentoId ===
+              lancamento.id
+              ? '…'
+              : '×'
+            }
 
           </button>
 
@@ -2762,7 +2651,13 @@ function Lancamentos({
 
         <div
           className="modal-overlay"
-          onMouseDown={limparFormulario}
+          onMouseDown={() => {
+            if (
+              !salvandoLancamento
+            ) {
+              limparFormulario();
+            }
+          }}
         >
 
           <section
@@ -2789,6 +2684,9 @@ function Lancamentos({
                 type="button"
                 className="modal-fechar"
                 onClick={limparFormulario}
+                disabled={
+                  salvandoLancamento
+                }
               >
                 ×
               </button>
@@ -3759,6 +3657,10 @@ function Lancamentos({
 
               }
 
+              disabled={
+                salvandoLancamento
+              }
+
             >
 
               Cancelar
@@ -3775,13 +3677,25 @@ function Lancamentos({
 
               }
 
+              disabled={
+                salvandoLancamento
+              }
+
             >
 
-              {lancamentoEditando
+              {salvandoLancamento
 
-                ? 'Salvar alterações'
+                ? lancamentoEditando
 
-                : 'Adicionar'
+                  ? 'Atualizando...'
+
+                  : 'Salvando...'
+
+                : lancamentoEditando
+
+                  ? 'Salvar alterações'
+
+                  : 'Adicionar'
 
               }
 

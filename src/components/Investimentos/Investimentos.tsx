@@ -16,6 +16,11 @@ import type {
 import SeletorMes
   from '../SeletorMes/SeletorMes';
 
+import {
+  confirmarAcao,
+  notificar
+} from '../../lib/feedback';
+
 type InvestimentosProps = {
   lancamentos:
     Lancamento[];
@@ -142,6 +147,18 @@ function Investimentos({
     setErroMovimentacao
   ] =
     useState('');
+
+  const [
+    salvandoMovimentacao,
+    setSalvandoMovimentacao
+  ] =
+    useState(false);
+
+  const [
+    excluindoMovimentacaoId,
+    setExcluindoMovimentacaoId
+  ] =
+    useState<number | null>(null);
 
   function formatarValor(
     valor:
@@ -560,6 +577,12 @@ function Investimentos({
 
   async function salvarMovimentacao() {
 
+    if (
+      salvandoMovimentacao
+    ) {
+      return;
+    }
+
     const valor =
       Number(
         valorMovimentacao
@@ -626,6 +649,10 @@ function Investimentos({
 
     }
 
+    setSalvandoMovimentacao(
+      true
+    );
+
     const dadosMovimentacao = {
       caixinha:
         caixinhaSelecionada,
@@ -636,21 +663,40 @@ function Investimentos({
         dataMovimentacao
     };
 
-    const sucesso =
-      movimentacaoEditando
-        ? await editarMovimentacao({
-            id:
-              movimentacaoEditando.id,
-            ...dadosMovimentacao
-          })
-        : await adicionarMovimentacao(
-            dadosMovimentacao
-          );
+    try {
+      const estavaEditando =
+        Boolean(
+          movimentacaoEditando
+        );
 
-    if (
-      sucesso
-    ) {
-      cancelarMovimentacao();
+      const sucesso =
+        movimentacaoEditando
+          ? await editarMovimentacao({
+              id:
+                movimentacaoEditando.id,
+              ...dadosMovimentacao
+            })
+          : await adicionarMovimentacao(
+              dadosMovimentacao
+            );
+
+      if (
+        sucesso
+      ) {
+        notificar(
+          estavaEditando
+            ? 'Movimentação atualizada com sucesso.'
+            : 'Movimentação adicionada com sucesso.',
+          'sucesso'
+        );
+
+        cancelarMovimentacao();
+      }
+    }
+    finally {
+      setSalvandoMovimentacao(
+        false
+      );
     }
 
   }
@@ -779,22 +825,55 @@ function Investimentos({
       number
   ) {
 
+    if (
+      excluindoMovimentacaoId !==
+      null
+    ) {
+      return;
+    }
+
     const confirmar =
-      window.confirm(
-        'Deseja realmente excluir esta movimentação?'
-      );
+      await confirmarAcao({
+        titulo:
+          'Excluir movimentação?',
+        mensagem:
+          'Essa movimentação será removida do histórico de investimentos.',
+        textoConfirmar:
+          'Excluir',
+        perigoso:
+          true
+      });
 
     if (
       !confirmar
     ) {
-
       return;
-
     }
 
-    await excluirMovimentacao(
+    setExcluindoMovimentacaoId(
       id
     );
+
+    try {
+      const sucesso =
+        await excluirMovimentacao(
+          id
+        );
+
+      if (
+        sucesso
+      ) {
+        notificar(
+          'Movimentação excluída com sucesso.',
+          'sucesso'
+        );
+      }
+    }
+    finally {
+      setExcluindoMovimentacaoId(
+        null
+      );
+    }
 
   }
 
@@ -904,9 +983,13 @@ function Investimentos({
 
         <div
           className="modal-overlay"
-          onMouseDown={
-            cancelarMovimentacao
-          }
+          onMouseDown={() => {
+            if (
+              !salvandoMovimentacao
+            ) {
+              cancelarMovimentacao();
+            }
+          }}
         >
 
           <section
@@ -943,6 +1026,9 @@ function Investimentos({
                 className="modal-fechar"
                 onClick={
                   cancelarMovimentacao
+                }
+                disabled={
+                  salvandoMovimentacao
                 }
               >
                 ×
@@ -1137,6 +1223,9 @@ function Investimentos({
                 onClick={
                   cancelarMovimentacao
                 }
+                disabled={
+                  salvandoMovimentacao
+                }
               >
                 Cancelar
               </button>
@@ -1146,14 +1235,21 @@ function Investimentos({
                 onClick={
                   salvarMovimentacao
                 }
+                disabled={
+                  salvandoMovimentacao
+                }
               >
 
-                {movimentacaoEditando
-                  ? 'Salvar alterações'
-                  : tipoMovimentacao ===
-                      'aporte'
-                    ? 'Adicionar aporte'
-                    : 'Registrar retirada'
+                {salvandoMovimentacao
+                  ? movimentacaoEditando
+                    ? 'Atualizando...'
+                    : 'Salvando...'
+                  : movimentacaoEditando
+                    ? 'Salvar alterações'
+                    : tipoMovimentacao ===
+                        'aporte'
+                      ? 'Adicionar aporte'
+                      : 'Registrar retirada'
                 }
 
               </button>
@@ -1644,8 +1740,16 @@ function Investimentos({
                       }}
 
                       title="Excluir movimentação"
+                      disabled={
+                        excluindoMovimentacaoId ===
+                        movimentacao.id
+                      }
                     >
-                      ×
+                      {excluindoMovimentacaoId ===
+                        movimentacao.id
+                        ? '…'
+                        : '×'
+                      }
                     </button>
 
                   </div>
