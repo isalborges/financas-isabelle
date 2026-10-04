@@ -27,9 +27,19 @@ import {
   notificar
 } from '../../lib/feedback';
 
+import {
+  SALDO_ANTERIOR_ID,
+  calcularSaldoAnterior,
+  dataSaldoAnterior,
+  nomeMesAnterior
+} from '../../lib/saldoFinanceiro.ts';
+
 type LancamentosProps = {
 
   lancamentos: Lancamento[];
+
+  movimentacoesInvestimento:
+    import('../../App').MovimentacaoInvestimento[];
 
   userId:
     string;
@@ -94,6 +104,8 @@ type ErrosFormulario = {
 function Lancamentos({
 
   lancamentos,
+
+  movimentacoesInvestimento,
 
   userId,
 
@@ -972,7 +984,35 @@ function Lancamentos({
       0
     );
 
-  const entradasDoMes =
+  const saldoAnterior =
+    calcularSaldoAnterior(
+      lancamentos,
+      movimentacoesInvestimento,
+      mesSelecionado
+    );
+
+  const lancamentoSaldoAnterior:
+    Lancamento | null =
+      saldoAnterior !== 0
+        ? {
+            id:
+              SALDO_ANTERIOR_ID,
+            data:
+              dataSaldoAnterior(
+                mesSelecionado
+              ),
+            descricao:
+              'Saldo do mês anterior',
+            categoria:
+              'Saldo anterior',
+            tipo:
+              'Entrada',
+            valor:
+              saldoAnterior
+          }
+        : null;
+
+  const entradasReaisDoMes =
     lancamentosDoMes
       .filter(
         (lancamento) =>
@@ -984,12 +1024,24 @@ function Lancamentos({
           dataParaNumero(dataVisivel(segundo))
       );
 
-  const totalEntradas =
-    entradasDoMes.reduce(
+  const entradasDoMes =
+    lancamentoSaldoAnterior
+      ? [
+          lancamentoSaldoAnterior,
+          ...entradasReaisDoMes
+        ]
+      : entradasReaisDoMes;
+
+  const totalEntradasReais =
+    entradasReaisDoMes.reduce(
       (total, lancamento) =>
         total + lancamento.valor,
       0
     );
+
+  const totalEntradas =
+    totalEntradasReais +
+    saldoAnterior;
 
   const gastosDoMes =
     lancamentosDoMes
@@ -2218,6 +2270,10 @@ function Lancamentos({
 
   ) {
 
+    const saldoAutomatico =
+      lancamento.id ===
+      SALDO_ANTERIOR_ID;
+
     const parcela =
 
       lancamento.parcelado
@@ -2288,19 +2344,29 @@ function Lancamentos({
 
               : ''
 
+          } ${
+
+            saldoAutomatico
+              ? 'linha-saldo-anterior'
+              : ''
+
           }`
 
         }
 
-        onClick={() =>
+        onClick={() => {
+
+          if (
+            saldoAutomatico
+          ) {
+            return;
+          }
 
           abrirEdicao(
-
             lancamento
+          );
 
-          )
-
-        }
+        }}
 
       >
 
@@ -2317,6 +2383,16 @@ function Lancamentos({
         <td>
 
           {lancamento.descricao}
+
+          {saldoAutomatico && (
+
+            <span className="badge-saldo-automatico">
+
+              Automático
+
+            </span>
+
+          )}
 
           {lancamento.recorrente && (
 
@@ -2350,7 +2426,12 @@ function Lancamentos({
 
         <td>
 
-          {lancamento.categoria}
+          {saldoAutomatico
+            ? `Saldo de ${nomeMesAnterior(
+                mesSelecionado
+              )}`
+            : lancamento.categoria
+          }
 
         </td>
 
@@ -2398,7 +2479,17 @@ function Lancamentos({
 
         <td>
 
-          {lancamento.tipo ===
+          {saldoAutomatico ? (
+
+            <span className="status-automatico">
+
+              Automático
+
+            </span>
+
+          )
+
+          : lancamento.tipo ===
 
             'Entrada' ? (
 
@@ -2474,38 +2565,51 @@ function Lancamentos({
 
         <td>
 
-          <button
+          {saldoAutomatico ? (
 
-            className="btn-excluir"
+            <span
+              className="saldo-automatico-bloqueado"
+              title="Este lançamento é calculado automaticamente."
+            >
+              —
+            </span>
 
-            onClick={(e) => {
+          ) : (
 
-              e.stopPropagation();
+            <button
 
-              removerLancamento(
+              className="btn-excluir"
 
+              onClick={(e) => {
+
+                e.stopPropagation();
+
+                removerLancamento(
+
+                  lancamento.id
+
+                );
+
+              }}
+
+              title="Excluir lançamento"
+
+              disabled={
+                excluindoLancamentoId ===
                 lancamento.id
+              }
 
-              );
+            >
 
-            }}
+              {excluindoLancamentoId ===
+                lancamento.id
+                ? '…'
+                : '×'
+              }
 
-            title="Excluir lançamento"
+            </button>
 
-            disabled={
-              excluindoLancamentoId ===
-              lancamento.id
-            }
-
-          >
-
-            {excluindoLancamentoId ===
-              lancamento.id
-              ? '…'
-              : '×'
-            }
-
-          </button>
+          )}
 
         </td>
 
@@ -3731,8 +3835,8 @@ function Lancamentos({
           <div>
             <h2>Entradas do mês</h2>
             <p>
-              Salários e outras entradas
-              consideradas neste mês.
+              Salários, outras entradas e o saldo
+              trazido do mês anterior.
             </p>
           </div>
 
@@ -3740,6 +3844,14 @@ function Lancamentos({
             <strong className="total-secao total-entrada">
               {formatarValor(totalEntradas)}
             </strong>
+
+            {saldoAnterior !== 0 && (
+              <small className="resumo-saldo-anterior">
+                {formatarValor(
+                  totalEntradasReais
+                )} em entradas do mês
+              </small>
+            )}
 
             <span className="contador-secao entradas">
               {entradasDoMes.length}

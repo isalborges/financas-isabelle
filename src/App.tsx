@@ -4280,6 +4280,14 @@ function App() {
 
 
 
+              movimentacoesInvestimento={
+
+                movimentacoesInvestimento
+
+              }
+
+
+
               userId={
 
                 session.user.id

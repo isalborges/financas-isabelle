@@ -16,6 +16,12 @@ import GraficoGastos
 import SeletorMes
   from '../SeletorMes/SeletorMes';
 
+import {
+  calcularSaldoAnterior,
+  dataSaldoAnterior,
+  nomeMesAnterior
+} from '../../lib/saldoFinanceiro.ts';
+
 type DashboardProps = {
   lancamentos:
     Lancamento[];
@@ -47,7 +53,10 @@ type DashboardProps = {
 
 type ItemHistorico = {
   id: string;
-  origem: 'lancamento' | 'investimento';
+  origem:
+    | 'lancamento'
+    | 'investimento'
+    | 'saldo_anterior';
   lancamentoId?: number;
   data: string;
   dataOrdenacao: number;
@@ -59,6 +68,7 @@ type ItemHistorico = {
     | 'aporte'
     | 'retirada';
   valor: number;
+  tipoTexto?: string;
 };
 
 function Dashboard({
@@ -455,10 +465,23 @@ function Dashboard({
         0
       );
 
+  const saldoAnterior =
+    calcularSaldoAnterior(
+      lancamentos,
+      movimentacoesInvestimento,
+      mesSelecionado
+    );
+
   const saldoMesAtual =
+    saldoAnterior +
     entradas -
     gastos -
     investimentoLiquidoMes;
+
+  const mesAnteriorNome =
+    nomeMesAnterior(
+      mesSelecionado
+    );
 
   function nomeCaixinha(
     id: string
@@ -595,10 +618,56 @@ function Dashboard({
           }
         );
 
+  const historicoSaldoAnterior:
+    ItemHistorico[] =
+      saldoAnterior !== 0
+        ? [
+            {
+              id:
+                `saldo-anterior-${mesSelecionado}`,
+
+              origem:
+                'saldo_anterior',
+
+              data:
+                dataSaldoAnterior(
+                  mesSelecionado
+                ),
+
+              dataOrdenacao:
+                dataBRParaNumero(
+                  dataSaldoAnterior(
+                    mesSelecionado
+                  )
+                ),
+
+              descricao:
+                'Saldo do mês anterior',
+
+              detalhe:
+                `Gerado automaticamente • ${mesAnteriorNome}`,
+
+              tipo:
+                saldoAnterior >= 0
+                  ? 'entrada'
+                  : 'saida',
+
+              tipoTexto:
+                'Saldo anterior',
+
+              valor:
+                Math.abs(
+                  saldoAnterior
+                )
+            }
+          ]
+        : [];
+
   const historicoMes =
     [
       ...historicoLancamentos,
-      ...historicoInvestimentos
+      ...historicoInvestimentos,
+      ...historicoSaldoAnterior
     ].sort(
       (
         primeiro,
@@ -788,6 +857,15 @@ function Dashboard({
           )}
 
         </h2>
+
+        {saldoAnterior !== 0 && (
+          <p className="saldo-anterior-detalhe">
+            {saldoAnterior >= 0
+              ? `Inclui ${formatarValor(saldoAnterior)} trazidos de ${mesAnteriorNome}.`
+              : `Inclui déficit de ${formatarValor(Math.abs(saldoAnterior))} trazido de ${mesAnteriorNome}.`
+            }
+          </p>
+        )}
 
       </section>
 
@@ -1042,13 +1120,16 @@ function Dashboard({
                       item.tipo === 'retirada';
 
                     const textoTipo =
-                      item.tipo === 'entrada'
-                        ? 'Entrada'
-                        : item.tipo === 'saida'
-                          ? 'Saída'
-                          : item.tipo === 'aporte'
-                            ? 'Investimento'
-                            : 'Retirada';
+                      item.tipoTexto ??
+                      (
+                        item.tipo === 'entrada'
+                          ? 'Entrada'
+                          : item.tipo === 'saida'
+                            ? 'Saída'
+                            : item.tipo === 'aporte'
+                              ? 'Investimento'
+                              : 'Retirada'
+                      );
 
                     return (
                       <tr

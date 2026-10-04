@@ -4398,3 +4398,85 @@ button:disabled {
 .modal-fechar:disabled {
   pointer-events: none;
 }
+
+
+/* SALDO TRAZIDO DO MÃŠS ANTERIOR */
+
+.saldo-anterior-detalhe {
+  margin: 10px 0 0;
+  color: #777;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.linha-saldo-anterior {
+  cursor: default !important;
+  background: var(--accent-soft-3);
+}
+
+.linha-saldo-anterior:hover {
+  background: var(--accent-soft-3) !important;
+}
+
+.badge-saldo-automatico {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.saldo-automatico-bloqueado {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.resumo-saldo-anterior {
+  display: block;
+  margin-top: 4px;
+  color: #888;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+:root[data-theme-mode='escuro'] .linha-saldo-anterior {
+  background: var(--surface-soft);
+}
+
+:root[data-theme-mode='escuro'] .linha-saldo-anterior:hover {
+  background: var(--surface-soft) !important;
+}
+
+:root[data-theme-mode='escuro'] .saldo-anterior-detalhe,
+:root[data-theme-mode='escuro'] .resumo-saldo-anterior {
+  color: var(--text-secondary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme-mode='sistema'] .linha-saldo-anterior {
+    background: var(--surface-soft);
+  }
+
+  :root[data-theme-mode='sistema'] .linha-saldo-anterior:hover {
+    background: var(--surface-soft) !important;
+  }
+
+  :root[data-theme-mode='sistema'] .saldo-anterior-detalhe,
+  :root[data-theme-mode='sistema'] .resumo-saldo-anterior {
+    color: var(--text-secondary);
+  }
+}
+
+@media (max-width: 768px) {
+  .saldo-anterior-detalhe {
+    font-size: 12px;
+  }
+
+  .badge-saldo-automatico {
+    margin-left: 6px;
+  }
+}
