@@ -12,6 +12,7 @@ type SidebarProps = {
     secao:
       | 'perfil'
       | 'aparencia'
+      | 'configuracoes-iniciais'
       | 'caixinhas'
       | 'categorias'
       | 'formas-pagamento'
@@ -383,6 +384,18 @@ function Sidebar({
                 }}
               >
                 Aparência
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  abrirConfiguracao(
+                    'configuracoes-iniciais'
+                  );
+                  fecharMenuMobile();
+                }}
+              >
+                Configurações iniciais da conta
               </button>
 
               <button

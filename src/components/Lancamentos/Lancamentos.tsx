@@ -29,6 +29,7 @@ import {
 
 import {
   SALDO_ANTERIOR_ID,
+  SALDO_INICIAL_ID,
   calcularSaldoAnterior,
   dataSaldoAnterior,
   nomeMesAnterior
@@ -988,23 +989,40 @@ function Lancamentos({
     calcularSaldoAnterior(
       lancamentos,
       movimentacoesInvestimento,
-      mesSelecionado
+      mesSelecionado,
+      configuracoes
+    );
+
+  const mesInicial =
+    Boolean(
+      configuracoes.inicioControle &&
+      mesSelecionado ===
+        configuracoes.inicioControle
     );
 
   const lancamentoSaldoAnterior:
     Lancamento | null =
-      saldoAnterior !== 0
+      (
+        mesInicial ||
+        saldoAnterior !== 0
+      )
         ? {
             id:
-              SALDO_ANTERIOR_ID,
+              mesInicial
+                ? SALDO_INICIAL_ID
+                : SALDO_ANTERIOR_ID,
             data:
               dataSaldoAnterior(
                 mesSelecionado
               ),
             descricao:
-              'Saldo do mês anterior',
+              mesInicial
+                ? 'Saldo inicial do controle'
+                : 'Saldo do mês anterior',
             categoria:
-              'Saldo anterior',
+              mesInicial
+                ? 'Saldo inicial'
+                : 'Saldo anterior',
             tipo:
               'Entrada',
             valor:
@@ -2272,7 +2290,9 @@ function Lancamentos({
 
     const saldoAutomatico =
       lancamento.id ===
-      SALDO_ANTERIOR_ID;
+        SALDO_ANTERIOR_ID ||
+      lancamento.id ===
+        SALDO_INICIAL_ID;
 
     const parcela =
 
@@ -2427,9 +2447,11 @@ function Lancamentos({
         <td>
 
           {saldoAutomatico
-            ? `Saldo de ${nomeMesAnterior(
-                mesSelecionado
-              )}`
+            ? mesInicial
+              ? 'Início do controle'
+              : `Saldo de ${nomeMesAnterior(
+                  mesSelecionado
+                )}`
             : lancamento.categoria
           }
 
@@ -3841,17 +3863,38 @@ function Lancamentos({
           </div>
 
           <div className="secao-lancamentos-resumo">
-            <strong className="total-secao total-entrada">
-              {formatarValor(totalEntradas)}
-            </strong>
-
-            {saldoAnterior !== 0 && (
-              <small className="resumo-saldo-anterior">
+            <div className="resumo-entradas-detalhado">
+              <strong className="total-secao total-entrada">
                 {formatarValor(
                   totalEntradasReais
-                )} em entradas do mês
+                )}
+              </strong>
+
+              <small className="resumo-saldo-anterior">
+                Entradas reais do mês
               </small>
-            )}
+
+              {lancamentoSaldoAnterior && (
+                <small className="resumo-saldo-anterior">
+                  {mesInicial
+                    ? 'Saldo inicial'
+                    : 'Saldo anterior'
+                  }:{' '}
+                  {formatarValor(
+                    saldoAnterior
+                  )}
+                </small>
+              )}
+
+              {lancamentoSaldoAnterior && (
+                <small className="resumo-total-considerado">
+                  Total considerado:{' '}
+                  {formatarValor(
+                    totalEntradas
+                  )}
+                </small>
+              )}
+            </div>
 
             <span className="contador-secao entradas">
               {entradasDoMes.length}

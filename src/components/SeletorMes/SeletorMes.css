@@ -396,3 +396,74 @@
     color: #ffffff;
   }
 }
+
+/* SELETOR USADO EM CONFIGURAÃ‡Ã•ES + LIMITE DO INÃCIO DO CONTROLE */
+
+.seletor-mes-navegacao-apenas-selecao {
+  grid-template-columns: 1fr;
+  max-width: none;
+  gap: 0;
+}
+
+.seletor-mes-atual-campo {
+  width: 100%;
+  min-height: 52px;
+  justify-content: space-between;
+  padding: 0 16px;
+  border: 1px solid var(--border-main);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  color: var(--text-main);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.seletor-mes-atual-campo:hover,
+.seletor-mes-atual-campo.aberto {
+  border-color: var(--accent);
+  background: var(--surface);
+  color: var(--text-main);
+}
+
+.seletor-mes-seta:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.seletor-mes-seta:disabled:hover {
+  background: #ffffff;
+  color: #7f7f82;
+  transform: none;
+}
+
+.seletor-mes-opcao.desabilitado,
+.seletor-mes-opcao:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.seletor-mes-opcao.desabilitado:hover,
+.seletor-mes-opcao:disabled:hover {
+  background: transparent;
+  color: #55555a;
+}
+
+:root[data-theme-mode='escuro'] .seletor-mes-atual-campo,
+:root[data-theme-mode='escuro'] .seletor-mes-atual-campo:hover,
+:root[data-theme-mode='escuro'] .seletor-mes-atual-campo.aberto {
+  background: var(--surface-soft);
+  color: var(--text-main);
+  border-color: var(--border-main);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme-mode='sistema'] .seletor-mes-atual-campo,
+  :root[data-theme-mode='sistema'] .seletor-mes-atual-campo:hover,
+  :root[data-theme-mode='sistema'] .seletor-mes-atual-campo.aberto {
+    background: var(--surface-soft);
+    color: var(--text-main);
+    border-color: var(--border-main);
+  }
+}

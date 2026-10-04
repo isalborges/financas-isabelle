@@ -648,6 +648,59 @@ function converterMovimentacaoParaBanco(
 
 
 
+function normalizarInicioControle(
+  valor: unknown
+): string | null {
+
+  if (
+    typeof valor !==
+      'string'
+  ) {
+    return null;
+  }
+
+  const texto =
+    valor.trim();
+
+  if (
+    /^\d{4}-\d{2}$/.test(
+      texto
+    )
+  ) {
+    return texto;
+  }
+
+  if (
+    /^\d{2}\/\d{4}$/.test(
+      texto
+    )
+  ) {
+    const [
+      mes,
+      ano
+    ] =
+      texto.split('/');
+
+    return `${ano}-${mes}`;
+  }
+
+  if (
+    /^\d{4}-\d{2}-\d{2}$/.test(
+      texto
+    )
+  ) {
+    return texto.slice(
+      0,
+      7
+    );
+  }
+
+  return null;
+
+}
+
+
+
 function App() {
 
   const configuracoesRef =
@@ -886,6 +939,51 @@ function App() {
       false
 
     );
+
+
+
+
+  useEffect(
+
+    () => {
+
+      const inicioControle =
+
+        configuracoesFinanceiras
+          .inicioControle;
+
+
+
+      if (
+
+        inicioControle &&
+
+        mesSelecionado <
+
+          inicioControle
+
+      ) {
+
+        setMesSelecionado(
+
+          inicioControle
+
+        );
+
+      }
+
+    },
+
+    [
+
+      configuracoesFinanceiras
+        .inicioControle,
+
+      mesSelecionado
+
+    ]
+
+  );
 
 
 
@@ -2577,7 +2675,7 @@ function App() {
 
             .select(
 
-              'categorias, caixinhas, formas_pagamento'
+              'categorias, caixinhas, formas_pagamento, inicio_controle, saldo_inicial_disponivel, saldos_iniciais_caixinhas'
 
             )
 
@@ -2683,7 +2781,34 @@ function App() {
 
                     'Débito'
 
-                  ]
+                  ],
+
+            inicioControle:
+
+              normalizarInicioControle(
+
+                data.inicio_controle
+
+              ),
+
+            saldoInicialDisponivel:
+
+              Number(
+
+                data.saldo_inicial_disponivel ??
+                0
+
+              ),
+
+            saldosIniciaisCaixinhas:
+
+              data.saldos_iniciais_caixinhas &&
+              typeof data.saldos_iniciais_caixinhas ===
+                'object'
+
+                ? data.saldos_iniciais_caixinhas
+
+                : {}
 
           });
 
@@ -2814,7 +2939,19 @@ function App() {
 
                           'Débito'
 
-                        ]
+                        ],
+
+                  inicioControle:
+
+                    null,
+
+                  saldoInicialDisponivel:
+
+                    0,
+
+                  saldosIniciaisCaixinhas:
+
+                    {}
 
                 };
 
@@ -2869,6 +3006,18 @@ function App() {
               formas_pagamento:
 
                 configuracoesIniciais.formasPagamento,
+
+              inicio_controle:
+
+                configuracoesIniciais.inicioControle,
+
+              saldo_inicial_disponivel:
+
+                configuracoesIniciais.saldoInicialDisponivel,
+
+              saldos_iniciais_caixinhas:
+
+                configuracoesIniciais.saldosIniciaisCaixinhas,
 
               updated_at:
 
@@ -3035,6 +3184,18 @@ function App() {
           formas_pagamento:
 
             novasConfiguracoes.formasPagamento,
+
+          inicio_controle:
+
+            novasConfiguracoes.inicioControle,
+
+          saldo_inicial_disponivel:
+
+            novasConfiguracoes.saldoInicialDisponivel,
+
+          saldos_iniciais_caixinhas:
+
+            novasConfiguracoes.saldosIniciaisCaixinhas,
 
           updated_at:
 
@@ -3696,6 +3857,8 @@ function App() {
       | 'perfil'
 
       | 'aparencia'
+
+      | 'configuracoes-iniciais'
 
       | 'caixinhas'
 
@@ -4409,6 +4572,14 @@ function App() {
               movimentacoesInvestimento={
 
                 movimentacoesInvestimento
+
+              }
+
+
+
+              configuracoes={
+
+                configuracoesFinanceiras
 
               }
 

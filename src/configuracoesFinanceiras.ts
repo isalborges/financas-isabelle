@@ -11,6 +11,15 @@ export type ConfiguracoesFinanceiras = {
   caixinhas:
     CaixinhaConfiguracao[];
   formasPagamento: string[];
+
+  inicioControle:
+    string | null;
+
+  saldoInicialDisponivel:
+    number;
+
+  saldosIniciaisCaixinhas:
+    Record<string, number>;
 };
 
 export const CONFIGURACOES_PADRAO:
@@ -45,7 +54,16 @@ export const CONFIGURACOES_PADRAO:
       percentualSalario: null,
       protegida: true
     }
-  ]
+  ],
+
+  inicioControle:
+    null,
+
+  saldoInicialDisponivel:
+    0,
+
+  saldosIniciaisCaixinhas:
+    {}
 };
 
 export function copiarConfiguracoesPadrao():
@@ -66,7 +84,20 @@ export function copiarConfiguracoesPadrao():
     formasPagamento: [
       ...CONFIGURACOES_PADRAO
         .formasPagamento
-    ]
+    ],
+
+    inicioControle:
+      CONFIGURACOES_PADRAO
+        .inicioControle,
+
+    saldoInicialDisponivel:
+      CONFIGURACOES_PADRAO
+        .saldoInicialDisponivel,
+
+    saldosIniciaisCaixinhas: {
+      ...CONFIGURACOES_PADRAO
+        .saldosIniciaisCaixinhas
+    }
   };
 }
 

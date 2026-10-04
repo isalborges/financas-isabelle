@@ -21,6 +21,9 @@ import {
   confirmarAcao
 } from '../../lib/feedback';
 
+import SeletorMes
+  from '../SeletorMes/SeletorMes';
+
 import './Configuracoes.css';
 
 type PerfilUsuario = {
@@ -866,6 +869,50 @@ const Configuracoes = forwardRef<
     });
   }
 
+  function alterarInicioControle(
+    valor: string
+  ) {
+    setConfiguracoes({
+      ...configuracoes,
+      inicioControle:
+        valor ||
+        null
+    });
+  }
+
+  function alterarSaldoInicialDisponivel(
+    valor: string
+  ) {
+    setConfiguracoes({
+      ...configuracoes,
+      saldoInicialDisponivel:
+        valor === ''
+          ? 0
+          : Number(
+              valor
+            )
+    });
+  }
+
+  function alterarSaldoInicialCaixinha(
+    id: string,
+    valor: string
+  ) {
+    setConfiguracoes({
+      ...configuracoes,
+      saldosIniciaisCaixinhas: {
+        ...configuracoes
+          .saldosIniciaisCaixinhas,
+        [id]:
+          valor === ''
+            ? 0
+            : Number(
+                valor
+              )
+      }
+    });
+  }
+
   function adicionarCaixinha() {
     const nome =
       novaCaixinha.trim();
@@ -930,13 +977,24 @@ const Configuracoes = forwardRef<
       return;
     }
 
+    const novosSaldosIniciais = {
+      ...configuracoes
+        .saldosIniciaisCaixinhas
+    };
+
+    delete novosSaldosIniciais[
+      id
+    ];
+
     setConfiguracoes({
       ...configuracoes,
       caixinhas:
         configuracoes.caixinhas.filter(
           (item) =>
             item.id !== id
-        )
+        ),
+      saldosIniciaisCaixinhas:
+        novosSaldosIniciais
     });
   }
 
@@ -1419,6 +1477,127 @@ const Configuracoes = forwardRef<
             Clique em Salvar configurações
             para manter a escolha na sua conta.
           </small>
+        </div>
+      </section>
+
+      <section
+        className="card config-secao"
+        id="config-configuracoes-iniciais"
+      >
+        <div className="config-titulo">
+          <div>
+            <h2>
+              Configurações iniciais da conta
+            </h2>
+
+            <p>
+              Defina a partir de qual mês sua conta financeira começa no app
+              e informe os valores que você já possuía nesse momento.
+            </p>
+          </div>
+        </div>
+
+        <div className="config-inicio-controle-grid">
+          <div className="campo">
+            <label>
+              Mês/ano de início
+            </label>
+
+            <div className="config-seletor-mes-inicial">
+              <SeletorMes
+                mesSelecionado={
+                  configuracoes.inicioControle ||
+                  '2026-09'
+                }
+                selecionarMes={
+                  alterarInicioControle
+                }
+                apenasSelecao
+              />
+            </div>
+
+            <small className="perfil-ajuda">
+              Exemplo: se você começou em setembro de 2026,
+              escolha Setembro 2026. O app não considera meses anteriores
+              no saldo acumulado, mas mantém as parcelas que vencem a partir desse período.
+            </small>
+          </div>
+
+          <div className="campo">
+            <label>
+              Saldo disponível no início
+            </label>
+
+            <input
+              type="number"
+              step="0.01"
+              value={
+                configuracoes
+                  .saldoInicialDisponivel
+              }
+              onChange={(evento) =>
+                alterarSaldoInicialDisponivel(
+                  evento.target.value
+                )
+              }
+              placeholder="0,00"
+            />
+
+            <small className="perfil-ajuda">
+              Informe quanto já estava disponível em conta quando o controle começou.
+              Esse valor não será tratado como salário ou nova receita.
+            </small>
+          </div>
+        </div>
+
+        <div className="config-saldos-iniciais">
+          <div className="config-titulo-secundario">
+            <h3>
+              Investimentos já existentes no início
+            </h3>
+
+            <p>
+              Informe o que já estava guardado em cada caixinha.
+              Esses valores entram no patrimônio, mas não como aporte do mês.
+            </p>
+          </div>
+
+          <div className="config-saldos-caixinhas-grid">
+            {configuracoes.caixinhas.map(
+              (caixinha) => (
+                <div
+                  className="campo"
+                  key={
+                    `saldo-inicial-${caixinha.id}`
+                  }
+                >
+                  <label>
+                    {caixinha.nome}
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={
+                      configuracoes
+                        .saldosIniciaisCaixinhas?.[
+                          caixinha.id
+                        ] ??
+                      0
+                    }
+                    onChange={(evento) =>
+                      alterarSaldoInicialCaixinha(
+                        caixinha.id,
+                        evento.target.value
+                      )
+                    }
+                    placeholder="0,00"
+                  />
+                </div>
+              )
+            )}
+          </div>
         </div>
       </section>
 

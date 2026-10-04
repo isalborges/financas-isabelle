@@ -21,6 +21,10 @@ import {
   notificar
 } from '../../lib/feedback';
 
+import {
+  saldoInicialCaixinha
+} from '../../lib/saldoFinanceiro';
+
 type InvestimentosProps = {
   lancamentos:
     Lancamento[];
@@ -324,7 +328,14 @@ function Investimentos({
               0,
               7
             ) ===
-          mesSelecionado
+            mesSelecionado &&
+          (
+            !configuracoes
+              .inicioControle ||
+            mesSelecionado >=
+              configuracoes
+                .inicioControle
+          )
       )
 
       .sort(
@@ -338,19 +349,70 @@ function Investimentos({
             )
       );
 
+  const mesInicialControle =
+    Boolean(
+      configuracoes.inicioControle &&
+      mesSelecionado ===
+        configuracoes.inicioControle
+    );
+
+  const investimentosIniciais =
+    mesInicialControle
+      ? configuracoes.caixinhas
+          .map(
+            (
+              caixinha
+            ) => ({
+              caixinha,
+              valor:
+                Number(
+                  configuracoes
+                    .saldosIniciaisCaixinhas?.[
+                      caixinha.id
+                    ] ??
+                  0
+                )
+            })
+          )
+          .filter(
+            (
+              item
+            ) =>
+              item.valor >
+              0
+          )
+      : [];
+
+  const totalItensMovimentacoesMes =
+    movimentacoesDoMes.length +
+    investimentosIniciais.length;
+
   const movimentacoesAteMes =
     movimentacoes
 
       .filter(
         (
           movimentacao
-        ) =>
-          movimentacao.data
-            .slice(
-              0,
-              7
-            ) <=
-          mesSelecionado
+        ) => {
+          const mes =
+            movimentacao.data
+              .slice(
+                0,
+                7
+              );
+
+          return (
+            mes <=
+              mesSelecionado &&
+            (
+              !configuracoes
+                .inicioControle ||
+              mes >=
+                configuracoes
+                  .inicioControle
+            )
+          );
+        }
       );
 
   function totalPorCaixinhaNoMes(
@@ -391,6 +453,26 @@ function Investimentos({
       number
   ) {
 
+    const caixinhaConfigurada =
+      configuracoes.caixinhas.find(
+        (
+          item
+        ) =>
+          item.id ===
+            caixinha ||
+          item.nome ===
+            caixinha
+      );
+
+    const saldoInicial =
+      caixinhaConfigurada
+        ? saldoInicialCaixinha(
+            configuracoes,
+            caixinhaConfigurada.id,
+            mesSelecionado
+          )
+        : 0;
+
     return movimentacoesAteMes
 
       .filter(
@@ -418,7 +500,7 @@ function Investimentos({
             : total -
               movimentacao.valor,
 
-        0
+        saldoInicial
       );
 
   }
@@ -896,6 +978,9 @@ function Investimentos({
 
         selecionarMes={
           selecionarMes
+        }
+        mesMinimo={
+          configuracoes.inicioControle
         }
       />
 
@@ -1601,13 +1686,13 @@ function Investimentos({
 
           <span className="contador-aportes">
 
-            {movimentacoesDoMes.length}
+            {totalItensMovimentacoesMes}
 
           </span>
 
         </div>
 
-        {movimentacoesDoMes.length ===
+        {totalItensMovimentacoesMes ===
           0 ? (
 
           <div className="sem-aportes">
@@ -1634,6 +1719,70 @@ function Investimentos({
         ) : (
 
           <div className="lista-aportes">
+
+            {investimentosIniciais.map(
+              (
+                item
+              ) => (
+
+                <div
+                  className="item-aporte item-aporte-inicial"
+                  key={
+                    `saldo-inicial-${item.caixinha.id}`
+                  }
+                >
+
+                  <div className="aporte-info">
+
+                    <strong>
+
+                      {item.caixinha.nome}
+
+                      <span className="badge-investimento-inicial">
+                        Automático
+                      </span>
+
+                    </strong>
+
+                    <span>
+
+                      Saldo inicial investido
+
+                      {' • '}
+
+                      {formatarData(
+                        `${configuracoes.inicioControle}-01`
+                      )}
+
+                    </span>
+
+                  </div>
+
+                  <div className="aporte-acoes">
+
+                    <strong className="valor-aporte">
+
+                      +{' '}
+
+                      {formatarValor(
+                        item.valor
+                      )}
+
+                    </strong>
+
+                    <span
+                      className="investimento-inicial-bloqueado"
+                      title="Este valor foi definido nas Configurações iniciais da conta."
+                    >
+                      —
+                    </span>
+
+                  </div>
+
+                </div>
+
+              )
+            )}
 
             {movimentacoesDoMes.map(
               (

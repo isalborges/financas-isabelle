@@ -1,4 +1,4 @@
-/* CONFIGURAÇÕES */
+/* CONFIGURAÃ‡Ã•ES */
 
 .config-secao {
   display: flex;
@@ -327,7 +327,7 @@
 }
 
 
-/* AVISO IMPORTANTE NO TOPO DAS CONFIGURAÇÕES */
+/* AVISO IMPORTANTE NO TOPO DAS CONFIGURAÃ‡Ã•ES */
 
 .config-aviso-importante {
   display: grid;
@@ -376,5 +376,83 @@
   .config-aviso-importante-icone {
     width: 34px;
     height: 34px;
+  }
+}
+
+
+/* INÃCIO DO CONTROLE FINANCEIRO */
+
+.config-inicio-controle-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.config-saldos-iniciais {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-main);
+}
+
+.config-titulo-secundario h3 {
+  margin: 0 0 6px;
+  color: var(--text-main);
+  font-size: 15px;
+}
+
+.config-titulo-secundario p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.config-saldos-caixinhas-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  gap: 14px;
+  margin-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .config-inicio-controle-grid,
+  .config-saldos-caixinhas-grid {
+    grid-template-columns:
+      1fr;
+  }
+}
+
+
+.config-seletor-mes-inicial {
+  position: relative;
+  z-index: 35;
+}
+
+.config-seletor-mes-inicial .seletor-mes {
+  justify-content: stretch;
+}
+
+.config-seletor-mes-inicial .seletor-mes-popover {
+  left: 0;
+  transform: none;
+}
+
+.config-seletor-mes-inicial .seletor-mes-popover {
+  animation: none;
+}
+
+@media (max-width: 768px) {
+  .config-seletor-mes-inicial .seletor-mes-popover {
+    left: 50%;
+    transform: translateX(-50%);
   }
 }

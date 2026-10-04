@@ -19,7 +19,8 @@ import SeletorMes
 import {
   calcularSaldoAnterior,
   dataSaldoAnterior,
-  nomeMesAnterior
+  nomeMesAnterior,
+  totalInvestidoAteMes
 } from '../../lib/saldoFinanceiro.ts';
 
 type DashboardProps = {
@@ -56,6 +57,7 @@ type ItemHistorico = {
   origem:
     | 'lancamento'
     | 'investimento'
+    | 'investimento_inicial'
     | 'saldo_anterior';
   lancamentoId?: number;
   data: string;
@@ -300,7 +302,13 @@ function Dashboard({
   }
 
   const lancamentosDoMes =
-    lancamentos.filter(
+    (
+      configuracoes.inicioControle &&
+      mesSelecionado <
+        configuracoes.inicioControle
+    )
+      ? []
+      : lancamentos.filter(
       (
         lancamento
       ) => {
@@ -455,7 +463,12 @@ function Dashboard({
       .filter(
         (movimentacao) =>
           movimentacao.data.slice(0, 7) ===
-          mesSelecionado
+            mesSelecionado &&
+          (
+            !configuracoes.inicioControle ||
+            mesSelecionado >=
+              configuracoes.inicioControle
+          )
       )
       .reduce(
         (total, movimentacao) =>
@@ -469,7 +482,8 @@ function Dashboard({
     calcularSaldoAnterior(
       lancamentos,
       movimentacoesInvestimento,
-      mesSelecionado
+      mesSelecionado,
+      configuracoes
     );
 
   const saldoMesAtual =
@@ -480,6 +494,20 @@ function Dashboard({
 
   const mesAnteriorNome =
     nomeMesAnterior(
+      mesSelecionado
+    );
+
+  const mesInicial =
+    Boolean(
+      configuracoes.inicioControle &&
+      mesSelecionado ===
+        configuracoes.inicioControle
+    );
+
+  const totalInvestido =
+    totalInvestidoAteMes(
+      configuracoes,
+      movimentacoesInvestimento,
       mesSelecionado
     );
 
@@ -573,7 +601,12 @@ function Dashboard({
                 0,
                 7
               ) ===
-            mesSelecionado
+              mesSelecionado &&
+            (
+              !configuracoes.inicioControle ||
+              mesSelecionado >=
+                configuracoes.inicioControle
+            )
         )
         .map(
           (movimentacao) => {
@@ -618,9 +651,80 @@ function Dashboard({
           }
         );
 
+  const historicoInvestimentosIniciais:
+    ItemHistorico[] =
+      mesInicial
+        ? configuracoes.caixinhas
+            .map(
+              (
+                caixinha
+              ) => ({
+                caixinha,
+                valor:
+                  Number(
+                    configuracoes
+                      .saldosIniciaisCaixinhas?.[
+                        caixinha.id
+                      ] ??
+                    0
+                  )
+              })
+            )
+            .filter(
+              (
+                item
+              ) =>
+                item.valor >
+                0
+            )
+            .map(
+              (
+                item
+              ) => {
+                const data =
+                  dataSaldoAnterior(
+                    mesSelecionado
+                  );
+
+                return {
+                  id:
+                    `investimento-inicial-${item.caixinha.id}`,
+
+                  origem:
+                    'investimento_inicial' as const,
+
+                  data,
+
+                  dataOrdenacao:
+                    dataBRParaNumero(
+                      data
+                    ),
+
+                  descricao:
+                    'Saldo inicial investido',
+
+                  detalhe:
+                    `${item.caixinha.nome} • Automático`,
+
+                  tipo:
+                    'aporte' as const,
+
+                  tipoTexto:
+                    'Patrimônio inicial',
+
+                  valor:
+                    item.valor
+                };
+              }
+            )
+        : [];
+
   const historicoSaldoAnterior:
     ItemHistorico[] =
-      saldoAnterior !== 0
+      (
+        mesInicial ||
+        saldoAnterior !== 0
+      )
         ? [
             {
               id:
@@ -642,10 +746,14 @@ function Dashboard({
                 ),
 
               descricao:
-                'Saldo do mês anterior',
+                mesInicial
+                  ? 'Saldo inicial do controle'
+                  : 'Saldo do mês anterior',
 
               detalhe:
-                `Gerado automaticamente • ${mesAnteriorNome}`,
+                mesInicial
+                  ? 'Definido nas configurações'
+                  : `Gerado automaticamente • ${mesAnteriorNome}`,
 
               tipo:
                 saldoAnterior >= 0
@@ -653,7 +761,9 @@ function Dashboard({
                   : 'saida',
 
               tipoTexto:
-                'Saldo anterior',
+                mesInicial
+                  ? 'Saldo inicial'
+                  : 'Saldo anterior',
 
               valor:
                 Math.abs(
@@ -667,6 +777,7 @@ function Dashboard({
     [
       ...historicoLancamentos,
       ...historicoInvestimentos,
+      ...historicoInvestimentosIniciais,
       ...historicoSaldoAnterior
     ].sort(
       (
@@ -691,7 +802,12 @@ function Dashboard({
               0,
               7
             ) ===
-            mesSelecionado
+            mesSelecionado &&
+          (
+            !configuracoes.inicioControle ||
+            mesSelecionado >=
+              configuracoes.inicioControle
+          )
       )
 
       .reduce(
@@ -842,6 +958,9 @@ function Dashboard({
         selecionarMes={
           selecionarMes
         }
+        mesMinimo={
+          configuracoes.inicioControle
+        }
       />
 
       <section className="card saldo">
@@ -860,9 +979,11 @@ function Dashboard({
 
         {saldoAnterior !== 0 && (
           <p className="saldo-anterior-detalhe">
-            {saldoAnterior >= 0
-              ? `Inclui ${formatarValor(saldoAnterior)} trazidos de ${mesAnteriorNome}.`
-              : `Inclui déficit de ${formatarValor(Math.abs(saldoAnterior))} trazido de ${mesAnteriorNome}.`
+            {mesInicial
+              ? `Inclui saldo inicial de ${formatarValor(saldoAnterior)} definido para o começo do controle.`
+              : saldoAnterior >= 0
+                ? `Inclui ${formatarValor(saldoAnterior)} trazidos de ${mesAnteriorNome}.`
+                : `Inclui déficit de ${formatarValor(Math.abs(saldoAnterior))} trazido de ${mesAnteriorNome}.`
             }
           </p>
         )}
@@ -897,6 +1018,16 @@ function Dashboard({
           valor={
             formatarValor(
               investidoMes
+            )
+          }
+        />
+
+        <CardFinanceiro
+          titulo="Total investido"
+
+          valor={
+            formatarValor(
+              totalInvestido
             )
           }
         />

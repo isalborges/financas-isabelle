@@ -17,6 +17,15 @@ import type {
   MovimentacaoInvestimento
 } from '../../App';
 
+import type {
+  ConfiguracoesFinanceiras
+} from '../../configuracoesFinanceiras';
+
+import {
+  calcularSaldoAnterior,
+  totalInvestidoAteMes
+} from '../../lib/saldoFinanceiro';
+
 import SeletorMes
   from '../SeletorMes/SeletorMes';
 
@@ -26,6 +35,9 @@ type RelatoriosProps = {
 
   movimentacoesInvestimento:
     MovimentacaoInvestimento[];
+
+  configuracoes:
+    ConfiguracoesFinanceiras;
 
   mesSelecionado:
     string;
@@ -55,6 +67,7 @@ const CORES_GRAFICO = [
 function Relatorios({
   lancamentos,
   movimentacoesInvestimento,
+  configuracoes,
   mesSelecionado,
   mesAnterior,
   proximoMes,
@@ -336,6 +349,14 @@ function Relatorios({
       string
   ) {
 
+    if (
+      configuracoes.inicioControle &&
+      mesReferencia <
+        configuracoes.inicioControle
+    ) {
+      return [];
+    }
+
     return lancamentos.filter(
       (
         lancamento
@@ -385,6 +406,14 @@ function Relatorios({
       string
   ) {
 
+    if (
+      configuracoes.inicioControle &&
+      mesReferencia <
+        configuracoes.inicioControle
+    ) {
+      return 0;
+    }
+
     return movimentacoesInvestimento
 
       .filter(
@@ -422,6 +451,14 @@ function Relatorios({
       string
   ) {
 
+    if (
+      configuracoes.inicioControle &&
+      mesReferencia <
+        configuracoes.inicioControle
+    ) {
+      return 0;
+    }
+
     return movimentacoesInvestimento
 
       .filter(
@@ -451,35 +488,11 @@ function Relatorios({
   }
 
   const totalInvestidoAcumulado =
-    movimentacoesInvestimento
-
-      .filter(
-        (
-          movimentacao
-        ) =>
-          movimentacao.data
-            .slice(
-              0,
-              7
-            ) <=
-          mesSelecionado
-      )
-
-      .reduce(
-        (
-          total,
-          movimentacao
-        ) =>
-          movimentacao.tipo ===
-            'aporte'
-
-            ? total +
-              movimentacao.valor
-
-            : total -
-              movimentacao.valor,
-        0
-      );
+    totalInvestidoAteMes(
+      configuracoes,
+      movimentacoesInvestimento,
+      mesSelecionado
+    );
 
   const dadosMes =
     lancamentosDoMes(
@@ -565,7 +578,16 @@ function Relatorios({
       mesSelecionado
     );
 
+  const saldoTrazido =
+    calcularSaldoAnterior(
+      lancamentos,
+      movimentacoesInvestimento,
+      mesSelecionado,
+      configuracoes
+    );
+
   const saldoAposGastos =
+    saldoTrazido +
     entradas -
     totalGastos -
     investimentoLiquido;
@@ -816,6 +838,9 @@ function Relatorios({
         selecionarMes={
           selecionarMes
         }
+        mesMinimo={
+          configuracoes.inicioControle
+        }
       />
 
       <section className="relatorio-resumo">
@@ -903,9 +928,9 @@ function Relatorios({
           </strong>
 
           <p>
-            Entradas menos gastos,
-            parcelas e investimento
-            líquido do mês.
+            Saldo trazido + entradas,
+            menos gastos, parcelas e
+            investimento líquido do mês.
           </p>
 
         </section>
@@ -925,8 +950,8 @@ function Relatorios({
           </strong>
 
           <p>
-            Soma dos aportes menos
-            retiradas até o mês selecionado.
+            Patrimônio inicial + aportes,
+            menos retiradas até o mês selecionado.
           </p>
 
         </section>
