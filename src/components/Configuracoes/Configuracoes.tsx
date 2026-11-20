@@ -850,6 +850,71 @@ const Configuracoes = forwardRef<
     });
   }
 
+  function alterarTipoMeta(
+    id: string,
+    tipoMeta:
+      'percentual' |
+      'valor' |
+      'sem-meta'
+  ) {
+    setConfiguracoes({
+      ...configuracoes,
+      caixinhas:
+        configuracoes.caixinhas.map(
+          (caixinha) =>
+            caixinha.id === id
+              ? {
+                  ...caixinha,
+                  tipoMeta,
+                  percentualSalario:
+                    tipoMeta ===
+                      'percentual'
+                      ? (
+                          caixinha.percentualSalario ??
+                          0
+                        )
+                      : null,
+                  valorMetaMensal:
+                    tipoMeta ===
+                      'valor'
+                      ? (
+                          caixinha.valorMetaMensal ??
+                          0
+                        )
+                      : null
+                }
+              : caixinha
+        )
+    });
+  }
+
+  function alterarValorMetaMensal(
+    id: string,
+    valor: string
+  ) {
+    setConfiguracoes({
+      ...configuracoes,
+      caixinhas:
+        configuracoes.caixinhas.map(
+          (caixinha) =>
+            caixinha.id === id
+              ? {
+                  ...caixinha,
+                  valorMetaMensal:
+                    valor === ''
+                      ? 0
+                      : Math.max(
+                          0,
+                          Number(
+                            valor
+                          )
+                        )
+                }
+              : caixinha
+        )
+    });
+  }
+
   function alterarNomeCaixinha(
     id: string,
     nome: string
@@ -930,6 +995,10 @@ const Configuracoes = forwardRef<
             criarIdCaixinha(nome),
           nome,
           percentualSalario:
+            null,
+          tipoMeta:
+            'sem-meta',
+          valorMetaMensal:
             null,
           protegida:
             false
@@ -1658,40 +1727,142 @@ const Configuracoes = forwardRef<
 
                   <div className="campo">
                     <label>
-                      Meta sobre o salário
+                      Tipo de meta
                     </label>
 
-                    <div className="config-percentual">
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        placeholder="Sem meta"
-                        value={
-                          caixinha.percentualSalario ??
-                          ''
-                        }
-                        onChange={(evento) =>
-                          alterarPercentual(
-                            caixinha.id,
-                            evento.target.value
-                          )
-                        }
-                      />
+                    <select
+                      value={
+                        caixinha.tipoMeta ??
+                        (
+                          caixinha.percentualSalario ===
+                            null
+                            ? 'sem-meta'
+                            : 'percentual'
+                        )
+                      }
+                      onChange={(evento) =>
+                        alterarTipoMeta(
+                          caixinha.id,
+                          evento.target.value as
+                            | 'percentual'
+                            | 'valor'
+                            | 'sem-meta'
+                        )
+                      }
+                    >
+                      <option value="percentual">
+                        Porcentagem do salário
+                      </option>
 
-                      <span>
-                        %
-                      </span>
-                    </div>
+                      <option value="valor">
+                        Valor fixo em reais
+                      </option>
+
+                      <option value="sem-meta">
+                        Sem meta
+                      </option>
+                    </select>
                   </div>
+
+                  {(
+                    caixinha.tipoMeta ??
+                    (
+                      caixinha.percentualSalario ===
+                        null
+                        ? 'sem-meta'
+                        : 'percentual'
+                    )
+                  ) === 'percentual' && (
+                    <div className="campo">
+                      <label>
+                        Porcentagem
+                      </label>
+
+                      <div className="config-percentual">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={
+                            caixinha.percentualSalario ??
+                            ''
+                          }
+                          onChange={(evento) =>
+                            alterarPercentual(
+                              caixinha.id,
+                              evento.target.value
+                            )
+                          }
+                        />
+
+                        <span>
+                          %
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {caixinha.tipoMeta ===
+                    'valor' && (
+                    <div className="campo">
+                      <label>
+                        Valor da meta mensal
+                      </label>
+
+                      <div className="config-meta-valor">
+                        <span>
+                          R$
+                        </span>
+
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={
+                            caixinha.valorMetaMensal ??
+                            ''
+                          }
+                          onChange={(evento) =>
+                            alterarValorMetaMensal(
+                              caixinha.id,
+                              evento.target.value
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="config-caixinha-rodape">
                   <span>
-                    {caixinha.percentualSalario ===
-                    null
-                      ? 'Sem meta automática'
-                      : `${caixinha.percentualSalario}% do salário`
+                    {(
+                      caixinha.tipoMeta ??
+                      (
+                        caixinha.percentualSalario ===
+                          null
+                          ? 'sem-meta'
+                          : 'percentual'
+                      )
+                    ) === 'valor'
+                      ? `Meta de R$ ${(caixinha.valorMetaMensal ?? 0).toLocaleString(
+                          'pt-BR',
+                          {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                          }
+                        )} por mês`
+                      : (
+                          caixinha.tipoMeta ??
+                          (
+                            caixinha.percentualSalario ===
+                              null
+                              ? 'sem-meta'
+                              : 'percentual'
+                          )
+                        ) === 'percentual'
+                        ? `${caixinha.percentualSalario ?? 0}% do salário`
+                        : 'Sem meta automática'
                     }
                   </span>
 

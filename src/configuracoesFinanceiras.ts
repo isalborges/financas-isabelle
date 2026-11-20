@@ -3,6 +3,12 @@ export type CaixinhaConfiguracao = {
   nome: string;
   percentualSalario:
     number | null;
+  tipoMeta?:
+    'percentual' |
+    'valor' |
+    'sem-meta';
+  valorMetaMensal?:
+    number | null;
   protegida?: boolean;
 };
 
@@ -46,12 +52,16 @@ export const CONFIGURACOES_PADRAO:
       id: 'renda-fixa',
       nome: 'Renda fixa',
       percentualSalario: 30,
+      tipoMeta: 'percentual',
+      valorMetaMensal: null,
       protegida: true
     },
     {
       id: 'ferias',
       nome: 'Férias',
       percentualSalario: null,
+      tipoMeta: 'sem-meta',
+      valorMetaMensal: null,
       protegida: true
     }
   ],

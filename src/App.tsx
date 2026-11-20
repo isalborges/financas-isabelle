@@ -210,6 +210,39 @@ export type Lancamento = {
 
     string;
 
+
+
+  recorrenciaExcecoes?:
+
+    Record<
+      string,
+      {
+        descricao?: string;
+        categoria?: string;
+        tipo?: 'Entrada' | 'Saída';
+        valor?: number;
+        formaPagamento?: FormaPagamento;
+      }
+    >;
+
+
+
+  anexoPath?:
+
+    string;
+
+
+
+  anexoNome?:
+
+    string;
+
+
+
+  anexoTipo?:
+
+    string;
+
 };
 
 
@@ -293,6 +326,24 @@ type LancamentoBanco = {
   parcela_atual: number | null;
 
   primeira_parcela: string | null;
+
+  recorrencia_excecoes:
+    Record<
+      string,
+      {
+        descricao?: string;
+        categoria?: string;
+        tipo?: 'Entrada' | 'Saída';
+        valor?: number;
+        formaPagamento?: FormaPagamento;
+      }
+    > | null;
+
+  anexo_path: string | null;
+
+  anexo_nome: string | null;
+
+  anexo_tipo: string | null;
 
 };
 
@@ -408,6 +459,30 @@ function converterLancamentoDoBanco(
 
       registro.primeira_parcela ??
 
+      undefined,
+
+    recorrenciaExcecoes:
+
+      registro.recorrencia_excecoes ??
+
+      undefined,
+
+    anexoPath:
+
+      registro.anexo_path ??
+
+      undefined,
+
+    anexoNome:
+
+      registro.anexo_nome ??
+
+      undefined,
+
+    anexoTipo:
+
+      registro.anexo_tipo ??
+
       undefined
 
   };
@@ -513,6 +588,30 @@ function converterLancamentoParaBanco(
     primeira_parcela:
 
       lancamento.primeiraParcela ??
+
+      null,
+
+    recorrencia_excecoes:
+
+      lancamento.recorrenciaExcecoes ??
+
+      null,
+
+    anexo_path:
+
+      lancamento.anexoPath ??
+
+      null,
+
+    anexo_nome:
+
+      lancamento.anexoNome ??
+
+      null,
+
+    anexo_tipo:
+
+      lancamento.anexoTipo ??
 
       null
 
@@ -826,7 +925,16 @@ function App() {
 
     useState(
 
-      '2026-09'
+      () => {
+
+        const agora =
+          new Date();
+
+        return `${agora.getFullYear()}-${String(
+          agora.getMonth() + 1
+        ).padStart(2, '0')}`;
+
+      }
 
     );
 

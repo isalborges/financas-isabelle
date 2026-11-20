@@ -1373,19 +1373,33 @@ function Investimentos({
                   caixinha.id
                 );
 
+              const tipoMeta =
+                caixinha.tipoMeta ??
+                (
+                  caixinha.percentualSalario ===
+                    null
+                    ? 'sem-meta'
+                    : 'percentual'
+                );
+
               const meta =
-                caixinha
-                  .percentualSalario ===
-                  null
-
-                  ? null
-
-                  : salarioDoMes *
-                    (
-                      caixinha
-                        .percentualSalario /
-                      100
-                    );
+                tipoMeta ===
+                  'valor'
+                  ? (
+                      caixinha.valorMetaMensal ??
+                      0
+                    )
+                  : tipoMeta ===
+                      'percentual'
+                    ? salarioDoMes *
+                      (
+                        (
+                          caixinha.percentualSalario ??
+                          0
+                        ) /
+                        100
+                      )
+                    : null;
 
               const progresso =
                 meta &&
@@ -1440,13 +1454,16 @@ function Investimentos({
 
                         <p>
 
-                          {caixinha
-                            .percentualSalario ===
-                            null
-
-                            ? 'Você decide quanto guardar em cada mês.'
-
-                            : `Meta mensal de ${caixinha.percentualSalario}% do salário.`
+                          {tipoMeta ===
+                            'valor'
+                            ? `Meta mensal fixa de ${formatarValor(
+                                caixinha.valorMetaMensal ??
+                                0
+                              )}.`
+                            : tipoMeta ===
+                                'percentual'
+                              ? `Meta mensal de ${caixinha.percentualSalario ?? 0}% do salário.`
+                              : 'Você decide quanto guardar em cada mês.'
                           }
 
                         </p>
@@ -1599,7 +1616,9 @@ function Investimentos({
                     </div>
 
                   ) : meta ===
-                    0 ? (
+                    0 &&
+                    tipoMeta ===
+                      'percentual' ? (
 
                     <div className="caixinha-aviso neutro">
 

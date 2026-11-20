@@ -28,6 +28,10 @@ import {
 } from '../../lib/feedback';
 
 import {
+  supabase
+} from '../../lib/supabase';
+
+import {
   SALDO_ANTERIOR_ID,
   SALDO_INICIAL_ID,
   calcularSaldoAnterior,
@@ -178,6 +182,28 @@ function Lancamentos({
   ] =
 
     useState<number | null>(null);
+
+  const [
+    arquivoAnexo,
+    setArquivoAnexo
+  ] =
+    useState<File | null>(
+      null
+    );
+
+  const [
+    removendoAnexo,
+    setRemovendoAnexo
+  ] =
+    useState(false);
+
+  const [
+    aguardandoEscopoRecorrencia,
+    setAguardandoEscopoRecorrencia
+  ] =
+    useState<Lancamento | null>(
+      null
+    );
 
   const [
 
@@ -800,83 +826,114 @@ function Lancamentos({
 
   }
 
+  function aplicarExcecaoRecorrencia(
+    lancamento: Lancamento
+  ) {
+    if (
+      !lancamento.recorrente
+    ) {
+      return lancamento;
+    }
+
+    const excecao =
+      lancamento.recorrenciaExcecoes?.[
+        mesSelecionado
+      ];
+
+    if (
+      !excecao
+    ) {
+      return lancamento;
+    }
+
+    return {
+      ...lancamento,
+      ...excecao,
+      formaPagamento:
+        excecao.formaPagamento ??
+        lancamento.formaPagamento
+    };
+  }
+
   const lancamentosDoMes =
 
-    lancamentos.filter(
+    lancamentos
+      .filter(
+        (lancamento) => {
 
-      (lancamento) => {
+          if (
 
-        if (
+            lancamento.recorrente
 
-          lancamento.recorrente
+          ) {
 
-        ) {
-
-          return recorrenciaAtivaNoMes(
-
-            lancamento
-
-          );
-
-        }
-
-        if (
-
-          lancamento.parcelado
-
-        ) {
-
-          return (
-
-            parcelaDoMes(
+            return recorrenciaAtivaNoMes(
 
               lancamento
 
-            ) !== null
+            );
+
+          }
+
+          if (
+
+            lancamento.parcelado
+
+          ) {
+
+            return (
+
+              parcelaDoMes(
+
+                lancamento
+
+              ) !== null
+
+            );
+
+          }
+
+          const partes =
+
+            lancamento.data
+
+              .split('/');
+
+          if (
+
+            partes.length !== 3
+
+          ) {
+
+            return false;
+
+          }
+
+          const [
+
+            ,
+
+            mes,
+
+            ano
+
+          ] =
+
+            partes;
+
+          return (
+
+            `${ano}-${mes}` ===
+
+            mesSelecionado
 
           );
 
         }
-
-        const partes =
-
-          lancamento.data
-
-            .split('/');
-
-        if (
-
-          partes.length !== 3
-
-        ) {
-
-          return false;
-
-        }
-
-        const [
-
-          ,
-
-          mes,
-
-          ano
-
-        ] =
-
-          partes;
-
-        return (
-
-          `${ano}-${mes}` ===
-
-          mesSelecionado
-
-        );
-
-      }
-
-    );
+      )
+      .map(
+        aplicarExcecaoRecorrencia
+      );
 
   function estaPago(
 
@@ -1135,6 +1192,18 @@ function Lancamentos({
 
     setErros({});
 
+    setArquivoAnexo(
+      null
+    );
+
+    setRemovendoAnexo(
+      false
+    );
+
+    setAguardandoEscopoRecorrencia(
+      null
+    );
+
     setMostrarFormulario(
 
       false
@@ -1172,6 +1241,14 @@ function Lancamentos({
     );
 
     setErros({});
+
+    setArquivoAnexo(
+      null
+    );
+
+    setRemovendoAnexo(
+      false
+    );
 
     setLancamentoEditando(
 
@@ -1881,6 +1958,300 @@ function Lancamentos({
 
   }
 
+  function dataFimMesAnterior(
+    mes: string
+  ) {
+    const [
+      ano,
+      numeroMes
+    ] =
+      mes
+        .split('-')
+        .map(Number);
+
+    const data =
+      new Date(
+        ano,
+        numeroMes - 1,
+        0
+      );
+
+    return `${data.getFullYear()}-${String(
+      data.getMonth() + 1
+    ).padStart(2, '0')}-${String(
+      data.getDate()
+    ).padStart(2, '0')}`;
+  }
+
+  async function prepararAnexo(
+    lancamentoBase:
+      Lancamento
+  ) {
+    if (
+      removendoAnexo
+    ) {
+      return {
+        ...lancamentoBase,
+        anexoPath:
+          undefined,
+        anexoNome:
+          undefined,
+        anexoTipo:
+          undefined
+      };
+    }
+
+    if (
+      !arquivoAnexo
+    ) {
+      return lancamentoBase;
+    }
+
+    const tiposPermitidos = [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'application/pdf'
+    ];
+
+    if (
+      !tiposPermitidos.includes(
+        arquivoAnexo.type
+      )
+    ) {
+      window.alert(
+        'Use uma imagem JPG, PNG, WEBP ou um arquivo PDF.'
+      );
+
+      return null;
+    }
+
+    if (
+      arquivoAnexo.size >
+      10 * 1024 * 1024
+    ) {
+      window.alert(
+        'O comprovante pode ter no máximo 10 MB.'
+      );
+
+      return null;
+    }
+
+    const extensao =
+      arquivoAnexo.name
+        .split('.')
+        .pop() ??
+      'arquivo';
+
+    const caminho =
+      `${userId}/${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2)}.${extensao}`;
+
+    const {
+      error
+    } =
+      await supabase.storage
+        .from(
+          'comprovantes'
+        )
+        .upload(
+          caminho,
+          arquivoAnexo,
+          {
+            contentType:
+              arquivoAnexo.type,
+            upsert: false
+          }
+        );
+
+    if (
+      error
+    ) {
+      window.alert(
+        `Não foi possível enviar o comprovante: ${error.message}`
+      );
+
+      return null;
+    }
+
+    return {
+      ...lancamentoBase,
+      anexoPath:
+        caminho,
+      anexoNome:
+        arquivoAnexo.name,
+      anexoTipo:
+        arquivoAnexo.type
+    };
+  }
+
+  async function abrirAnexo(
+    lancamento:
+      Lancamento
+  ) {
+    if (
+      !lancamento.anexoPath
+    ) {
+      return;
+    }
+
+    const {
+      data,
+      error
+    } =
+      await supabase.storage
+        .from(
+          'comprovantes'
+        )
+        .createSignedUrl(
+          lancamento.anexoPath,
+          60
+        );
+
+    if (
+      error ||
+      !data?.signedUrl
+    ) {
+      window.alert(
+        'Não foi possível abrir o comprovante.'
+      );
+
+      return;
+    }
+
+    window.open(
+      data.signedUrl,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  }
+
+  async function salvarRecorrenciaComEscopo(
+    novoLancamento:
+      Lancamento,
+    escopo:
+      'somente-esta' |
+      'esta-e-proximas' |
+      'toda-serie'
+  ) {
+    if (
+      !lancamentoEditando
+    ) {
+      return false;
+    }
+
+    if (
+      escopo ===
+      'toda-serie'
+    ) {
+      return await editarLancamento(
+        novoLancamento
+      );
+    }
+
+    if (
+      escopo ===
+      'somente-esta'
+    ) {
+      const original =
+        lancamentos.find(
+          (
+            item
+          ) =>
+            item.id ===
+            lancamentoEditando.id
+        ) ??
+        lancamentoEditando;
+
+      return await editarLancamento({
+        ...original,
+        recorrenciaExcecoes: {
+          ...(
+            original.recorrenciaExcecoes ??
+            {}
+          ),
+          [mesSelecionado]: {
+            descricao:
+              novoLancamento.descricao,
+            categoria:
+              novoLancamento.categoria,
+            tipo:
+              novoLancamento.tipo,
+            valor:
+              novoLancamento.valor,
+            formaPagamento:
+              novoLancamento.formaPagamento
+          }
+        },
+        anexoPath:
+          novoLancamento.anexoPath,
+        anexoNome:
+          novoLancamento.anexoNome,
+        anexoTipo:
+          novoLancamento.anexoTipo
+      });
+    }
+
+    const original =
+      lancamentos.find(
+        (
+          item
+        ) =>
+          item.id ===
+          lancamentoEditando.id
+      ) ??
+      lancamentoEditando;
+
+    const sucessoEncerrar =
+      await editarLancamento({
+        ...original,
+        dataFim:
+          dataFimMesAnterior(
+            mesSelecionado
+          )
+      });
+
+    if (
+      !sucessoEncerrar
+    ) {
+      return false;
+    }
+
+    const diaOriginal =
+      original.dataInicio
+        ?.slice(
+          8,
+          10
+        ) ??
+      '01';
+
+    const novaDataInicio =
+      `${mesSelecionado}-${diaOriginal}`;
+
+    return await adicionarLancamento({
+      ...novoLancamento,
+      id:
+        Date.now(),
+      data:
+        new Date(
+          `${novaDataInicio}T12:00:00`
+        ).toLocaleDateString(
+          'pt-BR'
+        ),
+      dataInicio:
+        novaDataInicio,
+      dataFim:
+        novoLancamento.dataFim &&
+        novoLancamento.dataFim >=
+          novaDataInicio
+          ? novoLancamento.dataFim
+          : undefined,
+      recorrenciaExcecoes:
+        undefined
+    });
+  }
+
   async function salvarLancamento() {
 
     if (
@@ -2037,18 +2408,41 @@ function Lancamentos({
         };
       }
 
+      const lancamentoComAnexo =
+        await prepararAnexo(
+          novoLancamento
+        );
+
+      if (
+        !lancamentoComAnexo
+      ) {
+        return;
+      }
+
       const estavaEditando =
         Boolean(
           lancamentoEditando
         );
 
+      if (
+        lancamentoEditando?.recorrente &&
+        tipoLancamento ===
+          'recorrente'
+      ) {
+        setAguardandoEscopoRecorrencia(
+          lancamentoComAnexo
+        );
+
+        return;
+      }
+
       const sucesso =
         lancamentoEditando
           ? await editarLancamento(
-              novoLancamento
+              lancamentoComAnexo
             )
           : await adicionarLancamento(
-              novoLancamento
+              lancamentoComAnexo
             );
 
       if (
@@ -2403,6 +2797,23 @@ function Lancamentos({
         <td>
 
           {lancamento.descricao}
+
+          {lancamento.anexoPath && (
+            <button
+              type="button"
+              className="btn-anexo-linha"
+              title="Abrir comprovante"
+              onClick={(evento) => {
+                evento.stopPropagation();
+
+                abrirAnexo(
+                  lancamento
+                );
+              }}
+            >
+              📎
+            </button>
+          )}
 
           {saldoAutomatico && (
 
@@ -3771,6 +4182,72 @@ function Lancamentos({
 
           )}
 
+          <div className="campo campo-anexo">
+            <label>
+              Comprovante
+              <span className="campo-opcional">
+                opcional
+              </span>
+            </label>
+
+            {lancamentoEditando?.anexoPath &&
+              !removendoAnexo && (
+              <div className="anexo-existente">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() =>
+                    abrirAnexo(
+                      lancamentoEditando
+                    )
+                  }
+                >
+                  📎 {lancamentoEditando.anexoNome ??
+                    'Abrir comprovante'}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-link-perigo"
+                  onClick={() =>
+                    setRemovendoAnexo(
+                      true
+                    )
+                  }
+                >
+                  Remover
+                </button>
+              </div>
+            )}
+
+            <label className="anexo-upload">
+              <span>
+                {arquivoAnexo
+                  ? `📎 ${arquivoAnexo.name}`
+                  : lancamentoEditando?.anexoPath &&
+                      !removendoAnexo
+                    ? 'Substituir comprovante'
+                    : '📎 Adicionar comprovante'
+                }
+              </span>
+
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,application/pdf"
+                onChange={(evento) =>
+                  setArquivoAnexo(
+                    evento.target.files?.[0] ??
+                    null
+                  )
+                }
+              />
+            </label>
+
+            <small className="anexo-ajuda">
+              JPG, PNG, WEBP ou PDF • até 10 MB.
+            </small>
+          </div>
+
           <div className="form-actions">
 
             <button
@@ -3833,6 +4310,164 @@ function Lancamentos({
 
         </div>
 
+      )}
+
+      {aguardandoEscopoRecorrencia && (
+        <div
+          className="modal-overlay"
+          onMouseDown={() =>
+            setAguardandoEscopoRecorrencia(
+              null
+            )
+          }
+        >
+          <section
+            className="card modal-card modal-recorrencia-opcoes"
+            onMouseDown={(evento) =>
+              evento.stopPropagation()
+            }
+          >
+            <div className="modal-topo">
+              <div>
+                <h2>
+                  Alterar recorrência
+                </h2>
+
+                <p>
+                  Qual parte da recorrência você quer alterar?
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="modal-fechar"
+                onClick={() =>
+                  setAguardandoEscopoRecorrencia(
+                    null
+                  )
+                }
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="recorrencia-opcoes">
+              <button
+                type="button"
+                onClick={async () => {
+                  setSalvandoLancamento(
+                    true
+                  );
+
+                  const sucesso =
+                    await salvarRecorrenciaComEscopo(
+                      aguardandoEscopoRecorrencia,
+                      'somente-esta'
+                    );
+
+                  setSalvandoLancamento(
+                    false
+                  );
+
+                  if (
+                    sucesso
+                  ) {
+                    notificar(
+                      'Somente esta ocorrência foi atualizada.',
+                      'sucesso'
+                    );
+
+                    limparFormulario();
+                  }
+                }}
+              >
+                <strong>
+                  Somente esta ocorrência
+                </strong>
+
+                <span>
+                  Os outros meses permanecem como estão.
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  setSalvandoLancamento(
+                    true
+                  );
+
+                  const sucesso =
+                    await salvarRecorrenciaComEscopo(
+                      aguardandoEscopoRecorrencia,
+                      'esta-e-proximas'
+                    );
+
+                  setSalvandoLancamento(
+                    false
+                  );
+
+                  if (
+                    sucesso
+                  ) {
+                    notificar(
+                      'Esta ocorrência e as próximas foram atualizadas.',
+                      'sucesso'
+                    );
+
+                    limparFormulario();
+                  }
+                }}
+              >
+                <strong>
+                  Esta e as próximas
+                </strong>
+
+                <span>
+                  Mantém os meses anteriores e aplica a mudança daqui em diante.
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  setSalvandoLancamento(
+                    true
+                  );
+
+                  const sucesso =
+                    await salvarRecorrenciaComEscopo(
+                      aguardandoEscopoRecorrencia,
+                      'toda-serie'
+                    );
+
+                  setSalvandoLancamento(
+                    false
+                  );
+
+                  if (
+                    sucesso
+                  ) {
+                    notificar(
+                      'Toda a série foi atualizada.',
+                      'sucesso'
+                    );
+
+                    limparFormulario();
+                  }
+                }}
+              >
+                <strong>
+                  Toda a série
+                </strong>
+
+                <span>
+                  Altera todas as ocorrências da recorrência.
+                </span>
+              </button>
+            </div>
+          </section>
+        </div>
       )}
 
       {/* ENTRADAS */}
