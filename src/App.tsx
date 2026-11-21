@@ -76,6 +76,12 @@ import Relatorios
 
 
 
+import VisaoAnual
+
+  from './components/VisaoAnual/VisaoAnual';
+
+
+
 import Configuracoes
 
   from './components/Configuracoes/Configuracoes';
@@ -4720,6 +4726,42 @@ function App() {
               selecionarMes={
 
                 selecionarMes
+
+              }
+
+            />
+
+
+
+          )}
+
+
+
+          {pagina ===
+
+            'visao-anual' && (
+
+            <VisaoAnual
+
+              lancamentos={
+
+                lancamentos
+
+              }
+
+
+
+              movimentacoesInvestimento={
+
+                movimentacoesInvestimento
+
+              }
+
+
+
+              configuracoes={
+
+                configuracoesFinanceiras
 
               }
 

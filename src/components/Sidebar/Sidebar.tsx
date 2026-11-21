@@ -288,6 +288,20 @@ function Sidebar({
           Relatórios
         </a>
 
+        <a
+          className={
+            paginaAtual === 'visao-anual'
+              ? 'active'
+              : ''
+          }
+          onClick={() => {
+            mudarPagina('visao-anual');
+            fecharMenuMobile();
+          }}
+        >
+          Visão Anual
+        </a>
+
         <div className="sidebar-grupo">
           <a
             className={
